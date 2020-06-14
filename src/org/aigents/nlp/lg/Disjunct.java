@@ -1,21 +1,26 @@
 package org.aigents.nlp.lg;
 
-import java.util.*;
-import java.io.*;
+import java.util.ArrayList;
 
 public class Disjunct {
-	String disjunct, classname;
-	double cost;
+	private ArrayList<String> connectors;
+	private double cost;
 	
-	public Disjunct(String disjunct, String classname, double cost) {
-		this.disjunct = disjunct;
-		this.classname = classname;
+	public Disjunct(ArrayList<String> connectors, double cost) {
+		this.connectors = connectors;
 		this.cost = cost;
 	}
 	
-	public String getDisjunct() {	return disjunct;	}
+	public Disjunct() {
+		connectors = new ArrayList<>();
+		cost = 0;
+	}
 	
-	public String getClassname() {	return classname;	}
+	public void addConnector(String s) {
+		connectors.add(s);
+	}
 	
+	public ArrayList<String> getConnectors() {	return connectors;	}
+		
 	public double getCost() {	return cost;	}
 }

@@ -1,11 +1,10 @@
 package org.aigents.nlp.lg;
 
-import java.util.*;
-import java.io.*;
+import java.util.ArrayList;
 
 public class Word {
-	String word, classname, subscript;
-	ArrayList<String> rules;
+	private String word, classname, subscript;
+	private ArrayList<String> rules;
 	
 	public Word(String word, String classname, String subscript, String rule, ArrayList<String> rules) {
 		this.word = word;
@@ -14,10 +13,17 @@ public class Word {
 		this.rules = rules;
 	}
 	
-	public Word(String word, String classname, String subscript, String rule) {
+	public Word(String word, String classname, String subscript) {
 		this.word = word;
 		this.classname = classname;
 		this.subscript = subscript;
+		this.rules = new ArrayList<>();
+	}
+	
+	public Word(String word) {
+		this.word = word;
+		this.classname = "";
+		this.subscript = "";
 		this.rules = new ArrayList<>();
 	}
 	
@@ -36,4 +42,9 @@ public class Word {
 	public String getSubscript() {	return subscript;	}
 	
 	public ArrayList<String> getRules() {	return rules;	}
+	
+	@Override
+	public String toString() {
+		return word;
+	}
 }

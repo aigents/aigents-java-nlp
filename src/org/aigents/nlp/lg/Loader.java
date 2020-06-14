@@ -1,10 +1,15 @@
 package org.aigents.nlp.lg;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Loader {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		String path = "4.0.dict";
 		String data = "<dictionary-version-number>: V0v0v4+;\n" + 
 				"<dictionary-locale>: EN4us+;\n" + 
 				"\n" + 
@@ -32,18 +37,47 @@ public class Loader {
 				"\n" + 
 				"% 5 word clusters, 5 Link Grammar rules.\n" + 
 				"% Link Grammar file saved to: /home/oleg/language-learning/output/POC-English-Amb-2018-06-06/POC-English-Amb/MST_fixed_manually/disjuncts-DRK-disjuncts/no-LEFT-WALL_no-period/generalized_rules/poc-english_5C_2018-06-06_0004.4.0.dict";
-		ArrayList<String[]> links = grammarBuildLinks(data);
-		for (String[] arr : links) {
-			System.out.println(Arrays.toString(arr));
+		
+		// Build dictionary from path name
+		Dictionary dict = grammarBuildLinks(path);
+		for (Word w : dict.getWords()) {
+			System.out.print(w.getWord() + ": ");
+			ArrayList<String> rules = w.getRules();
+			assert rules != null && rules.size() > 0: " No valid rules";
+			System.out.println(rules);
+			Disjunct d = dict.getDisjunct(rules.get(0));
+			assert d != null : "No valid disjunct";
+		}
+		
+		// Build dictionary from data (unit test)
+		for (Word w : unitTest(data).getWords()) {
+			System.out.print(w.getWord() + ": ");
+			ArrayList<String> rules = w.getRules();
+			assert rules != null && rules.size() > 0: " No valid rules";
+			System.out.println(rules);
+			Disjunct d = dict.getDisjunct(rules.get(0));
+			assert d != null : "No valid disjunct";
 		}
 	}
 	
-	private static boolean empty(String str) {
-		return str == null || str.isEmpty();
+	public static Dictionary grammarBuildLinks(String path) throws IOException {
+		URL url = new Loader().getClass().getResource(path);
+		File f = new File(url.getPath());
+		if (!f.exists()) return null;
+		List<String> list = Files.readAllLines(f.toPath());
+		String[] lines = new String[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			lines[i] = list.get(i);
+		}
+		return makeDict(lines);
 	}
 	
-	public static ArrayList<String[]> grammarBuildLinks(String data) {
+	public static Dictionary unitTest(String data) {
 		String[] lines = data.split("\n");
+		return makeDict(lines);
+	}
+	
+	private static Dictionary makeDict(String[] lines) {
 		ArrayList<String[]> links = new ArrayList<>();
 		if (lines == null || lines.length == 0) return null;
 		for (int l = 0; l < lines.length; l++){
@@ -69,20 +103,28 @@ public class Loader {
 				for (int i = 0; i < rules.length; i++){
 					rules[i] = rules[i].substring(0, rules[i].length() - 1).substring(1);
 					links.add(new String[] {code, rules[i], "cd"});
-					String[] connectors = rules[i].split(" & ");
-					if (connectors == null || connectors.length < 1) break;
-					for (int j = 0; j < connectors.length; j++) {
-						String connector = connectors[j];
-						String sign = connector.substring(connector.length() - 1);
-						String word = connector.substring(0, connector.length() - 1);
-						links.add(new String[] {rules[i], word, sign});
-					}
 				}
 				for (int i = 0; i < words.length; i++) {
 					links.add(new String[] {words[i], code, "wc"});
 				}
 			}
 		}
-		return links;
+		Dictionary dict = new Dictionary();
+		for (String[] arr : links) {
+			if (arr[2].equals("wc")) {
+				Word w = new Word(arr[0]);
+				for (String[] a : links) {
+					if (a[0].equals(arr[1])) {
+						w.addRule(a[1]);
+					}
+				}
+				dict.addWord(w);
+			}
+		}
+		return dict;
+	}
+	
+	private static boolean empty(String str) {
+		return str == null || str.isEmpty();
 	}
 }
