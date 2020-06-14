@@ -49,7 +49,7 @@ public class Loader {
 		for (int l = 0; l < lines.length; l++){
 			String line = lines[l];
 			if (empty(line)) continue;
-			if (line.substring(0,2) == "% " && line.toUpperCase() == line) {
+			if (line.substring(0,2).equals("% ") && line.toUpperCase() == line) {
 				String[] split = line.split(" ");
 				if (split == null || split.length < 2) continue;
 				String code = split[1];
