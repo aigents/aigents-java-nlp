@@ -12,4 +12,10 @@ public class Disjunct {
 		this.classname = classname;
 		this.cost = cost;
 	}
+	
+	public String getDisjunct() {	return disjunct;	}
+	
+	public String getClassname() {	return classname;	}
+	
+	public double getCost() {	return cost;	}
 }
