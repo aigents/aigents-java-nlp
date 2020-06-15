@@ -42,21 +42,27 @@ public class Loader {
 		Dictionary dict = grammarBuildLinks(path);
 		for (Word w : dict.getWords()) {
 			System.out.print(w.getWord() + ": ");
-			ArrayList<String> rules = w.getRules();
-			assert rules != null && rules.size() > 0: " No valid rules";
-			System.out.println(rules);
-			Disjunct d = dict.getDisjunct(rules.get(0));
-			assert d != null : "No valid disjunct";
+			Rule rule = w.getRule();
+			assert rule != null && rule.getWords().size() > 0: " No valid rules";
+			System.out.println(rule);
+			ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
+			assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
+			for (Disjunct d : disjuncts) {
+				System.out.println(d);
+			}
 		}
 		
 		// Build dictionary from data (unit test)
 		for (Word w : unitTest(data).getWords()) {
 			System.out.print(w.getWord() + ": ");
-			ArrayList<String> rules = w.getRules();
-			assert rules != null && rules.size() > 0: " No valid rules";
-			System.out.println(rules);
-			Disjunct d = dict.getDisjunct(rules.get(0));
-			assert d != null : "No valid disjunct";
+			Rule rule = w.getRule();
+			assert rule != null && rule.getWords().size() > 0: " No valid rules";
+			System.out.println(rule);
+			ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
+			assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
+			for (Disjunct d : disjuncts) {
+				System.out.println(d);
+			}
 		}
 	}
 	

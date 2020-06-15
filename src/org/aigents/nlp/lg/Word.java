@@ -1,47 +1,30 @@
 package org.aigents.nlp.lg;
 
-import java.util.ArrayList;
-
 public class Word {
-	private String word, classname, subscript;
-	private ArrayList<String> rules;
+	private String word;
+	private Rule rule;
 	
-	public Word(String word, String classname, String subscript, String rule, ArrayList<String> rules) {
+	public Word(String word, String classname, Rule rule) {
 		this.word = word;
-		this.classname = classname;
-		this.subscript = subscript;
-		this.rules = rules;
-	}
-	
-	public Word(String word, String classname, String subscript) {
-		this.word = word;
-		this.classname = classname;
-		this.subscript = subscript;
-		this.rules = new ArrayList<>();
+		this.rule = rule;
 	}
 	
 	public Word(String word) {
 		this.word = word;
-		this.classname = "";
-		this.subscript = "";
-		this.rules = new ArrayList<>();
+		rule = new Rule();
 	}
 	
 	public void addRule(String rule) {
-		rules.add(rule);
+		this.rule.addWord(rule);
 	}
 	
-	public void updateRules(ArrayList<String> rules) {
-		this.rules = rules;
+	public void updateRule(Rule rule) {
+		this.rule = rule;
 	}
 	
 	public String getWord() {	return word;	}
 	
-	public String getClassname() {	return classname;	}
-	
-	public String getSubscript() {	return subscript;	}
-	
-	public ArrayList<String> getRules() {	return rules;	}
+	public Rule getRule() {	return rule;	}
 	
 	@Override
 	public String toString() {

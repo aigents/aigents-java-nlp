@@ -23,4 +23,9 @@ public class Disjunct {
 	public ArrayList<String> getConnectors() {	return connectors;	}
 		
 	public double getCost() {	return cost;	}
+	
+	@Override
+	public String toString() {
+		return connectors.toString();
+	}
 }
