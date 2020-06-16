@@ -9,4 +9,4 @@ To test `Loader.java`, run
     javac org/aigents/nlp/lg/*.java
     java org.aigents.nlp.lg.Loader 4.0.dict board
     
-The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above).
+The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above) given the dictionary path specified in the first argument (`4.0.dict` in the line above). This project currently only supports the English dictionary `4.0.dict`, but more dictionaries will be added in future iterations.
