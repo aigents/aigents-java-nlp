@@ -9,60 +9,23 @@ import java.util.List;
 
 public class Loader {
 	public static void main(String[] args) throws IOException {
-		String path = "4.0.dict";
-		String data = "<dictionary-version-number>: V0v0v4+;\n" + 
-				"<dictionary-locale>: EN4us+;\n" + 
-				"\n" + 
-				"% C01\n" + 
-				"\"directors\" \"has\" \"with\":\n" + 
-				"(C02C01-) or (C03C01- & C01C02+) or (C03C01- & C01C05+) or (C04C01- & C01C05+) or (C05C01- & C01C02+) or (C05C01- & C01C04+) or (C05C01- & C01C05+);\n" + 
-				"\n" + 
-				"% C02\n" + 
-				"\"are\" \"binoculars\" \"board\" \"of\" \"sees\" \"to\" \"wants\" \"wood\":\n" + 
-				"(C01C02-) or (C02C02+) or (C02C02- & C02C01+) or (C02C02- & C02C03+) or (C02C02- & C02C04+) or (C03C02- & C02C02+ & C02C03+) or (C03C02- & C02C03+ & C02C02+) or (C03C02- & C02C03+ & C02C03+) or (C05C02- & C02C03+) or (C05C02- & C04C02-) or (C05C02- & C05C02-) or (C05C02- & C05C02- & C02C02+);\n" + 
-				"\n" + 
-				"% C03\n" + 
-				"\"a\" \"before\" \"cake\" \"child\" \"dad\" \"daughter\" \"food\" \"her\" \"his\" \"human\" \"mom\" \"not\" \"now\" \"parent\" \"sausage\" \"son\" \"tool\":\n" + 
-				"(C02C03-) or (C02C03- & C03C03-) or (C03C01+) or (C03C02+) or (C03C03+) or (C03C03- & C02C03-) or (C03C03- & C03C04+) or (C03C03- & C03C05+) or (C03C03- & C05C03-) or (C03C04+) or (C03C05+) or (C04C03-) or (C05C03-) or (C05C03- & C03C01+);\n" + 
-				"\n" + 
-				"% C04\n" + 
-				"\"be\" \"chalk\" \"knocked\" \"likes\" \"sawed\":\n" + 
-				"(C01C04-) or (C02C04- & C04C05+) or (C03C04- & C04C02+ & C04C01+) or (C03C04- & C04C03+) or (C03C04- & C04C03+ & C04C03+);\n" + 
-				"\n" + 
-				"% C05\n" + 
-				"\"hammer\" \"is\" \"liked\" \"on\" \"saw\" \"telescope\" \"the\" \"was\" \"writes\":\n" + 
-				"(C01C05- & C03C05-) or (C03C05- & C01C05-) or (C03C05- & C05C01+ & C05C05+ & C05C02+) or (C03C05- & C05C03+) or (C03C05- & C05C03+ & C05C01+) or (C03C05- & C05C03+ & C05C03+) or (C03C05- & C05C03+ & C05C03+ & C05C03+) or (C03C05- & C05C05+) or (C03C05- & C05C05+ & C05C01+) or (C03C05- & C05C05+ & C05C02+ & C05C01+) or (C04C05- & C05C02+) or (C05C02+) or (C05C05+) or (C05C05- & C05C02+) or (C05C05- & C05C03+);\n" + 
-				"\n" + 
-				"UNKNOWN-WORD: XXX+;\n" + 
-				"\n" + 
-				"% 5 word clusters, 5 Link Grammar rules.\n" + 
-				"% Link Grammar file saved to: /home/oleg/language-learning/output/POC-English-Amb-2018-06-06/POC-English-Amb/MST_fixed_manually/disjuncts-DRK-disjuncts/no-LEFT-WALL_no-period/generalized_rules/poc-english_5C_2018-06-06_0004.4.0.dict";
-		
-		// Build dictionary from path name
-		Dictionary dict = grammarBuildLinks(path);
-		for (Word w : dict.getWords()) {
-			System.out.print(w.getWord() + ": ");
-			Rule rule = w.getRule();
-			assert rule != null && rule.getWords().size() > 0: " No valid rules";
-			System.out.println(rule);
-			ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
-			assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
-			for (Disjunct d : disjuncts) {
-				System.out.println(d);
+		if (args.length >= 2) {
+			Dictionary dict = grammarBuildLinks(args[0]);
+			for (Word w : dict.getWords()) {
+				if (w.getWord().equals(args[1])) {
+					System.out.print(w.getWord() + ": ");
+					Rule rule = w.getRule();
+					assert rule != null && rule.getWords().size() > 0: " No valid rules";
+					System.out.println(rule);
+					ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
+					assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
+					for (Disjunct d : disjuncts) {
+						System.out.println(d);
+					}
+				}
 			}
-		}
-		
-		// Build dictionary from data (unit test)
-		for (Word w : unitTest(data).getWords()) {
-			System.out.print(w.getWord() + ": ");
-			Rule rule = w.getRule();
-			assert rule != null && rule.getWords().size() > 0: " No valid rules";
-			System.out.println(rule);
-			ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
-			assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
-			for (Disjunct d : disjuncts) {
-				System.out.println(d);
-			}
+		} else {
+			System.out.println("No command line parameters given.");
 		}
 	}
 	
@@ -75,11 +38,6 @@ public class Loader {
 		for (int i = 0; i < list.size(); i++) {
 			lines[i] = list.get(i);
 		}
-		return makeDict(lines);
-	}
-	
-	public static Dictionary unitTest(String data) {
-		String[] lines = data.split("\n");
 		return makeDict(lines);
 	}
 	
