@@ -44,7 +44,7 @@ public class Rule {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < words.size(); i++) {
+		for (int i = 0; i < words.size() - 1; i++) {
 			s.append("(" + words.get(i) + ") or ");
 		}
 		s.append("(" + words.get(words.size() - 1) + ")");

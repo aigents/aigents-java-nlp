@@ -19,6 +19,9 @@ public class Loader {
 					System.out.println(rule);
 					ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
 					assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
+					for (Disjunct d : disjuncts) {
+						System.out.println(d);
+					}
 				}
 			}
 		} else {
@@ -75,7 +78,7 @@ public class Loader {
 			if (arr[2].equals("wc")) {
 				Word w = new Word(arr[0]);
 				for (String[] a : links) {
-					if (a[0].equals(arr[1])) {
+					if (a[0].equals(arr[1]) && !w.containsRule(a[1])) {
 						w.addRule(a[1]);
 					}
 				}

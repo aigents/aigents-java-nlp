@@ -18,6 +18,10 @@ public class Word {
 		this.rule.addWord(rule);
 	}
 	
+	public boolean containsRule(String rule) {
+		return this.rule.getWords().contains(rule);
+	}
+	
 	public void updateRule(Rule rule) {
 		this.rule = rule;
 	}
