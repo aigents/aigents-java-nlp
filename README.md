@@ -7,6 +7,6 @@ To test `Loader.java`, run
 
     cd src
     javac org/aigents/nlp/lg/*.java
-    java org.aigents.nlp.lg.Loader 4.0.dict board
+    java org.aigents.nlp.lg.Loader poc-english_5C_2018-06-06_0004.4.0.dict.txt board
     
-The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above) given the dictionary path specified in the first argument (`4.0.dict` in the line above). This project currently only supports the English dictionary `4.0.dict`, but more dictionaries will be added in future iterations.
+The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above) given the dictionary path specified in the first argument (`poc-english_5C_2018-06-06_0004.4.0.dict.txt` in the line above). This project currently only supports files with the same structure as `poc-english_5C_2018-06-06_0004.4.0.dict.txt`, but full dictionaries such as `4.0.dict` will be added in future iterations.
