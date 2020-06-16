@@ -75,7 +75,7 @@ public class Loader {
 			if (arr[2].equals("wc")) {
 				Word w = new Word(arr[0]);
 				for (String[] a : links) {
-					if (a[0].equals(arr[1])) {
+					if (a[0].equals(arr[1]) && !w.containsRule(a[1])) {
 						w.addRule(a[1]);
 					}
 				}
