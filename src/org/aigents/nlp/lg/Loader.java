@@ -19,6 +19,9 @@ public class Loader {
 					System.out.println(rule);
 					ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
 					assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
+					for (Disjunct d : disjuncts) {
+						System.out.println(d);
+					}
 				}
 			}
 		} else {
