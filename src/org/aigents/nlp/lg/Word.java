@@ -1,3 +1,11 @@
+/*******************************************************************
+ * Word.java                                                       *
+ * Stores the name and rule of a given word in the Link Grammar    *
+ * dictionary.                                                     *
+ *                                                                 *
+ * Written by Vignav Ramesh                                        *
+ *******************************************************************/
+
 package org.aigents.nlp.lg;
 
 public class Word {

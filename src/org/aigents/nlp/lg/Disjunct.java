@@ -1,3 +1,11 @@
+/*******************************************************************
+ * Disjunct.java                                                   *
+ * Stores the connectors and cost of a disjunct part of the        *
+ * Link Grammar dictionary.                                        *
+ *                                                                 *
+ * Written by Vignav Ramesh                                        *
+ *******************************************************************/
+
 package org.aigents.nlp.lg;
 
 import java.util.ArrayList;

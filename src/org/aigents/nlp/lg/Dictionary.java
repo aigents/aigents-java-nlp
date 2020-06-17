@@ -1,3 +1,10 @@
+/*******************************************************************
+ * Dictionary.java                                                 *
+ * Stores the Link Grammar dictionary for later use.               *
+ *                                                                 *
+ * Written by Vignav Ramesh                                        *
+ *******************************************************************/
+
 package org.aigents.nlp.lg;
 
 import java.util.HashSet;

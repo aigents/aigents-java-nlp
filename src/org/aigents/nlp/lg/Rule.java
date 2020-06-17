@@ -1,3 +1,11 @@
+/*******************************************************************
+ * Rule.java                                                       *
+ * Stores the words and disjuncts of a given rule of a word        * 
+ * in the Link Grammar dictionary.                                 *
+ *                                                                 *
+ * Written by Vignav Ramesh                                        *
+ *******************************************************************/
+
 package org.aigents.nlp.lg;
 
 import java.util.ArrayList;
