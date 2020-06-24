@@ -1,0 +1,128 @@
+% Grammar Learner v.0.7 2018-12-31 13:41:21 UTC
+<dictionary-version-number>: V0v0v6+;
+<dictionary-locale>: EN4us+;
+
+% AB
+"child" "food" "human" "parent" "tool":
+(AHAB- & AJAB-) or (AHAB- & ARAB-) or (AHAB- & BCAB- & ABAL+);
+
+% AC
+"dad" "daughter" "mom" "son":
+(ACAD+) or (ACAF+) or (ACAO+) or (ACAR+) or (ACAS+) or (ACAT+) or (ACAY+) or (ACBB+) or (ACBC+) or (ACBF+) or (ADAC-) or (AHAC- & ACAR+) or (AHAC- & ACAT+) or (AHAC- & BCAC- & ACAL+) or (APAC- & BBAC-) or (AQAC- & BBAC-) or (AYAC-) or (BAAC-) or (BBAC-);
+
+% AD
+"hammer" "saw" "telescope":
+(ACAD- & ADAC+ & ADAL+) or (ACAD- & ADAC+ & ADBD+) or (ADAR+) or (AHAD- & ADAR+) or (AHAD- & AOAD-) or (AHAD- & BDAD-);
+
+% AE
+"cake" "sausage":
+(AEAR+) or (AEBC+) or (ASAE-) or (ATAE-);
+
+% AF
+"knocked" "sawed":
+(ACAF- & AFBE+ & AFBD+);
+
+% AG
+"binoculars" "chalk":
+(AGAJ+) or (AOAG-) or (BDAG-);
+
+% AH
+"a":
+(AHAB+) or (AHAC+) or (AHAD+);
+
+% AJ
+"are":
+(AGAJ- & AJAB+);
+
+% AK
+"be":
+(BAAK- & BBAK- & AKAX+);
+
+% AL
+"before":
+(ABAL-) or (ACAL-) or (ADAL-) or (ASAL-);
+
+% AM
+"board":
+(AZAM- & AXAM-) or (AZAM- & AXAM- & AMAW+);
+
+% AN
+"directors":
+(AWAN-);
+
+% AO
+"has":
+(ACAO- & AOAD+) or (ACAO- & AOAG+);
+
+% AP
+"her":
+(APAC+);
+
+% AQ
+"his":
+(AQAC+);
+
+% AR
+"is":
+(ACAR- & ARAB+) or (ACAR- & ARAB+ & ARAV+) or (ACAR- & ARAX+) or (ADAR- & ARAB+) or (AEAR- & ARAB+) or (AEAR- & ARAB+ & ARAV+);
+
+% AS
+"liked":
+(ACAS- & ASAE+ & ASAL+);
+
+% AT
+"likes":
+(ACAT- & ATAE+) or (ACAT- & ATAE+ & ATAV+);
+
+% AU
+"not":
+(BCAU-);
+
+% AV
+"now":
+(ARAV-) or (ATAV-) or (AYAV-);
+
+% AW
+"of":
+(AMAW- & AWAN+);
+
+% AX
+"on":
+(AKAX- & AXAM+) or (ARAX- & AXAM+) or (BFAX- & AXAM+);
+
+% AY
+"sees":
+(ACAY- & AYAC+ & AYAV+);
+
+% AZ
+"the":
+(AZAM+) or (AZBE+);
+
+% BA
+"to":
+(BBBA- & BAAK+) or (BFBA- & BAAC+);
+
+% BB
+"wants":
+(ACBB- & BBAC+ & BBBA+ & BBAK+);
+
+% BC
+"was":
+(ACBC- & BCAC+) or (ACBC- & BCAU+ & BCAB+) or (AEBC- & BCAB+);
+
+% BD
+"with":
+(ADBD- & BDAD+) or (ADBD- & BDAG+) or (AFBD- & BDAD+) or (BFBD- & BDAG+);
+
+% BE
+"wood":
+(AZBE- & AFBE-);
+
+% BF
+"writes":
+(ACBF- & BFBA+ & BFBD+ & BFAX+) or (ACBF- & BFBD+ & BFAX+);
+
+<UNKNOWN-WORD>: XXX+;
+
+% 30 word clusters, 30 Link Grammar rules.
+% Link Grammar file saved to: /home/obaskov/94/language-learning/output/POC-English-2018-12-31/POC-English-Amb_LG-English_dILEd_gen-rules/dict_30C_2018-12-31_0006.4.0.dict

@@ -22,56 +22,18 @@
  * SOFTWARE.
  */
 
-package org.aigents.nlp.lg;
+package org.aigents.nlp.sat;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
-public class Rule {
-	private ArrayList<String> words;
-	private ArrayList<Disjunct> disjuncts;
+public class WatchlistInstance {
+	public ArrayList<LinkedList<ArrayList<Integer>>> watchlist;
 	
-	public Rule() {
-		words = new ArrayList<>();
-		disjuncts = new ArrayList<>();
-	}
-	
-	public Rule(ArrayList<String> words, ArrayList<Disjunct> disjuncts) {
-		this.words = words;
-		this.disjuncts = disjuncts;
-	}
-	
-	public void addWord(String word) {
-		words.add(word);
-		Disjunct d = new Disjunct();
-		for (String connector : word.split(" & ")) {
-			d.addConnector(connector);
+	public WatchlistInstance(SATInstance instance) {
+		watchlist = new ArrayList<>();
+		for (int i = 0; i < 2 * instance.getVariables().size(); i++) {
+			watchlist.add(new LinkedList<>());
 		}
-		addDisjunct(d);
-	}
-	
-	public void addDisjunct(Disjunct disjunct) {
-		disjuncts.add(disjunct);
-	}
-	
-	public void updateWords(ArrayList<String> words) {
-		this.words = words;
-	}
-	
-	public void updateDisjuncts(ArrayList<Disjunct> disjuncts) {
-		this.disjuncts = disjuncts;
-	}
-	
-	public ArrayList<String> getWords() {	return words;	}
-	
-	public ArrayList<Disjunct> getDisjuncts() {	return disjuncts;	}
-	
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < words.size() - 1; i++) {
-			s.append("(" + words.get(i) + ") or ");
-		}
-		s.append("(" + words.get(words.size() - 1) + ")");
-		return s.toString();
 	}
 }

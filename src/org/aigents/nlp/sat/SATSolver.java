@@ -22,56 +22,36 @@
  * SOFTWARE.
  */
 
-package org.aigents.nlp.lg;
+package org.aigents.nlp.sat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-public class Rule {
-	private ArrayList<String> words;
-	private ArrayList<Disjunct> disjuncts;
-	
-	public Rule() {
-		words = new ArrayList<>();
-		disjuncts = new ArrayList<>();
-	}
-	
-	public Rule(ArrayList<String> words, ArrayList<Disjunct> disjuncts) {
-		this.words = words;
-		this.disjuncts = disjuncts;
-	}
-	
-	public void addWord(String word) {
-		words.add(word);
-		Disjunct d = new Disjunct();
-		for (String connector : word.split(" & ")) {
-			d.addConnector(connector);
+public class SATSolver {
+	public static void main(String[] args) throws IOException {
+		SATInstance instance = SATInstance.fromFile("test.txt"); // args[0] -> path
+		ArrayList<Assignment> assignments = generateAssignments(instance, true); // instance, args[1] -> verbose
+		int count = 0;
+		for (Assignment a : assignments) {
+			count++;
+			if (true) { // args[1]
+				System.err.println("Found satisfying assignment #" + count);
+			}
+			String assignmentStr = instance.assignmentToString(a, true, null); // a, args[2] -> brief
+			System.out.println(assignmentStr);
 		}
-		addDisjunct(d);
-	}
-	
-	public void addDisjunct(Disjunct disjunct) {
-		disjuncts.add(disjunct);
-	}
-	
-	public void updateWords(ArrayList<String> words) {
-		this.words = words;
-	}
-	
-	public void updateDisjuncts(ArrayList<Disjunct> disjuncts) {
-		this.disjuncts = disjuncts;
-	}
-	
-	public ArrayList<String> getWords() {	return words;	}
-	
-	public ArrayList<Disjunct> getDisjuncts() {	return disjuncts;	}
-	
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < words.size() - 1; i++) {
-			s.append("(" + words.get(i) + ") or ");
+		if (true && count == 0) { // args[1]
+			System.err.println("No satisfying assignment exists.");
 		}
-		s.append("(" + words.get(words.size() - 1) + ")");
-		return s.toString();
+	}
+	
+	private static ArrayList<Assignment> generateAssignments(SATInstance instance, boolean verbose) {
+		int n = instance.getVariables().size();
+		WatchlistInstance watchlist = Watchlist.setupWatchlist(instance);
+		Assignment a = new Assignment();
+		for (int i = 0; i < n; i++) {
+			a.booleans.add(null);
+		}
+		return Solve.solve(instance, watchlist, a, 0, verbose);
 	}
 }

@@ -22,56 +22,47 @@
  * SOFTWARE.
  */
 
-package org.aigents.nlp.lg;
+package org.aigents.nlp.sat;
 
 import java.util.ArrayList;
 
-public class Rule {
-	private ArrayList<String> words;
-	private ArrayList<Disjunct> disjuncts;
-	
-	public Rule() {
-		words = new ArrayList<>();
-		disjuncts = new ArrayList<>();
-	}
-	
-	public Rule(ArrayList<String> words, ArrayList<Disjunct> disjuncts) {
-		this.words = words;
-		this.disjuncts = disjuncts;
-	}
-	
-	public void addWord(String word) {
-		words.add(word);
-		Disjunct d = new Disjunct();
-		for (String connector : word.split(" & ")) {
-			d.addConnector(connector);
+public class Solve {
+	public static ArrayList<Assignment> solve(SATInstance instance, WatchlistInstance watchlist, Assignment assignment, int d, boolean verbose) {
+		int n = instance.getVariables().size();
+		int[] state = new int[n];
+		ArrayList<Assignment> ret = new ArrayList<>();
+		while (true) {
+			if (d == n) {
+				ret.add(assignment);
+				d -= 1;
+				continue;
+			}
+			boolean triedSomething = false;
+			for (var a : new int[] {0, 1}) {
+				if (((state[d] >> a) & 1) == 0) {
+					if (verbose) {
+						System.err.println("Trying " + instance.getVariables().get(d) + " = " + a);
+					}
+					triedSomething = true;
+					state[d] |= 1 << a;
+					assignment.booleans.set(d, a == 0? false : true);
+					if (!Watchlist.updateWatchlist(instance, watchlist, d << 1 | a, assignment, verbose)) {
+						assignment.booleans.set(d, null);
+					} else {
+						d += 1;
+						break;
+					}
+				}
+			}
+			if (!triedSomething) {
+				if (d == 0) {
+					return ret;
+				} else {
+					state[d] = 0;
+					assignment.booleans.set(d, null);
+					d -= 1;
+				}
+			}
 		}
-		addDisjunct(d);
-	}
-	
-	public void addDisjunct(Disjunct disjunct) {
-		disjuncts.add(disjunct);
-	}
-	
-	public void updateWords(ArrayList<String> words) {
-		this.words = words;
-	}
-	
-	public void updateDisjuncts(ArrayList<Disjunct> disjuncts) {
-		this.disjuncts = disjuncts;
-	}
-	
-	public ArrayList<String> getWords() {	return words;	}
-	
-	public ArrayList<Disjunct> getDisjuncts() {	return disjuncts;	}
-	
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < words.size() - 1; i++) {
-			s.append("(" + words.get(i) + ") or ");
-		}
-		s.append("(" + words.get(words.size() - 1) + ")");
-		return s.toString();
 	}
 }

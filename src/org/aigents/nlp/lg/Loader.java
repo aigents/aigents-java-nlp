@@ -31,10 +31,12 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aigents.nlp.sat.Generator;
+
 public class Loader {
 	public static void main(String[] args) throws IOException {
 		if (args.length >= 2) {
-			Dictionary dict = grammarBuildLinks(args[0]);
+			Dictionary dict = grammarBuildLinks(args[0], false);
 			for (Word w : dict.getWords()) {
 				if (w.getWord().equals(args[1])) {
 					System.out.print(w.getWord() + ": ");
@@ -55,8 +57,11 @@ public class Loader {
 		}
 	}
 	
-	public static Dictionary grammarBuildLinks(String path) throws IOException {
-		URL url = new Loader().getClass().getResource(path);
+	public static Dictionary grammarBuildLinks(String path, boolean isGenerator) throws IOException {
+		URL url; 
+		if (isGenerator) {
+			url = new Generator().getClass().getResource(path);
+		} else url = new Loader().getClass().getResource(path);
 		File f = new File(url.getPath());
 		if (!f.exists()) return null;
 		List<String> list = Files.readAllLines(f.toPath());
@@ -111,6 +116,7 @@ public class Loader {
 				dict.addWord(w);
 			}
 		}
+		System.out.println("Dictionary built successfully.");
 		return dict;
 	}
 	

@@ -22,56 +22,46 @@
  * SOFTWARE.
  */
 
-package org.aigents.nlp.lg;
+package org.aigents.nlp.sat;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
-public class Rule {
-	private ArrayList<String> words;
-	private ArrayList<Disjunct> disjuncts;
-	
-	public Rule() {
-		words = new ArrayList<>();
-		disjuncts = new ArrayList<>();
-	}
-	
-	public Rule(ArrayList<String> words, ArrayList<Disjunct> disjuncts) {
-		this.words = words;
-		this.disjuncts = disjuncts;
-	}
-	
-	public void addWord(String word) {
-		words.add(word);
-		Disjunct d = new Disjunct();
-		for (String connector : word.split(" & ")) {
-			d.addConnector(connector);
+import org.aigents.nlp.lg.Dictionary;
+import org.aigents.nlp.lg.Loader;
+
+
+public class Generator {
+	public static void main(String[] args) throws IOException {
+		if (args.length >= 2) {
+			Dictionary dict = Loader.grammarBuildLinks(args[0], true);
+			processSentences(args[1]);
+		} else {
+			System.out.println("No command line parameters given.");
 		}
-		addDisjunct(d);
 	}
 	
-	public void addDisjunct(Disjunct disjunct) {
-		disjuncts.add(disjunct);
-	}
-	
-	public void updateWords(ArrayList<String> words) {
-		this.words = words;
-	}
-	
-	public void updateDisjuncts(ArrayList<Disjunct> disjuncts) {
-		this.disjuncts = disjuncts;
-	}
-	
-	public ArrayList<String> getWords() {	return words;	}
-	
-	public ArrayList<Disjunct> getDisjuncts() {	return disjuncts;	}
-	
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		for (int i = 0; i < words.size() - 1; i++) {
-			s.append("(" + words.get(i) + ") or ");
+	public static void processSentences(String path) throws IOException {
+		URL url = new Generator().getClass().getResource(path);
+		File f = new File(url.getPath());
+		if (!f.exists()) return;
+		List<String> sentences = Files.readAllLines(f.toPath());
+		Iterator<String> it = sentences.iterator();
+		while (it.hasNext()) {
+			if (it.next().isEmpty()) it.remove();
 		}
-		s.append("(" + words.get(words.size() - 1) + ")");
-		return s.toString();
+		List<List<String>> words = new ArrayList<>();
+		for (String sentence : sentences) {
+			ArrayList<String> w = new ArrayList<>(Arrays.asList(sentence.split(" ")));
+			w.set(w.size() - 1, w.get(w.size() - 1).substring(0, w.get(w.size() - 1).length() - 1));
+			words.add(w);
+		}
+		System.out.println(words);
 	}
 }
