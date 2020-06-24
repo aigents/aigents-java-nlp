@@ -10,7 +10,7 @@ To test `Generator.java`, run
     javac org/aigents/nlp/sat/*.java
     java org.aigents.nlp.sat.Generator dict_30C_2018-12-31_0006.4.0.dict poc_english.txt
     
-The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and then loads, tokenizes, and outputs the sentences given in the file with the path specified the second argument (`poc_english.txt` in the line above).
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified the second argument (`poc_english.txt` in the line above).
 
 To test `Loader.java`, run 
 
