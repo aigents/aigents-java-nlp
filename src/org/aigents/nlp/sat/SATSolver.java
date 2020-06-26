@@ -29,19 +29,19 @@ import java.util.ArrayList;
 
 public class SATSolver {
 	public static void main(String[] args) throws IOException {
-		SATInstance instance = SATInstance.fromFile("test2.txt"); // args[0] -> path
-		boolean verbose = false; // args[1]
-		ArrayList<ArrayList<Boolean>> assignments = generateAssignments(instance, verbose); //
+		SATInstance instance = SATInstance.fromFile(args[0]);
+		boolean verbose = Boolean.valueOf(args[1]);
+		ArrayList<ArrayList<Boolean>> assignments = generateAssignments(instance, verbose);
 		int count = 0;
 		for (ArrayList<Boolean> a : assignments) {
 			count++;
 			if (verbose) { 
 				System.err.println("Found satisfying assignment #" + count);
 			}
-			String assignmentStr = instance.assignmentToString(new Assignment(a), true, null); // a, args[2] -> brief
+			String assignmentStr = instance.assignmentToString(new Assignment(a), Boolean.valueOf(args[2]), null);
 			System.out.println(assignmentStr);
 		}
-		if (true && count == 0) { // args[1]
+		if (verbose && count == 0) {
 			System.err.println("No satisfying assignment exists.");
 		}
 	}
