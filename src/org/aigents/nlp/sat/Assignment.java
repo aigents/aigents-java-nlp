@@ -32,4 +32,8 @@ public class Assignment {
 	public Assignment() {
 		booleans = new ArrayList<>();
 	}
+	
+	public Assignment(ArrayList<Boolean> booleans) {
+		this.booleans = booleans;
+	}
 }

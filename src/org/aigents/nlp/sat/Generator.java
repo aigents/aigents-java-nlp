@@ -41,27 +41,37 @@ public class Generator {
 	public static void main(String[] args) throws IOException {
 		if (args.length >= 2) {
 			Dictionary dict = Loader.grammarBuildLinks(args[0], true);
-			processSentences(args[1]);
+			List<String[]> words = processSentences(args[1]);
+			if (words == null) {
+				System.err.println("Error loading and tokenizing sentences.");
+				return;
+			}
+			System.out.println(generateSentence(words.get(0)));
 		} else {
 			System.out.println("No command line parameters given.");
 		}
 	}
 	
-	public static void processSentences(String path) throws IOException {
+	public static String generateSentence(String[] words) {
+		
+		return null;
+	}
+	
+	public static List<String[]> processSentences(String path) throws IOException {
 		URL url = new Generator().getClass().getResource(path);
 		File f = new File(url.getPath());
-		if (!f.exists()) return;
+		if (!f.exists()) return null;
 		List<String> sentences = Files.readAllLines(f.toPath());
 		Iterator<String> it = sentences.iterator();
 		while (it.hasNext()) {
 			if (it.next().isEmpty()) it.remove();
 		}
-		List<List<String>> words = new ArrayList<>();
+		List<String[]> words = new ArrayList<>();
 		for (String sentence : sentences) {
-			ArrayList<String> w = new ArrayList<>(Arrays.asList(sentence.split(" ")));
-			w.set(w.size() - 1, w.get(w.size() - 1).substring(0, w.get(w.size() - 1).length() - 1));
+			String[] w = sentence.split(" ");
+			w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
 			words.add(w);
 		}
-		System.out.println(words);
+		return words;
 	}
 }

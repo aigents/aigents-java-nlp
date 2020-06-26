@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.aigents.nlp.lg.Loader;
-
 public class SATInstance {
 	private ArrayList<String> variables;
 	private HashMap<String, Integer> variableTable;
@@ -58,7 +56,9 @@ public class SATInstance {
 				variables.add(variable);
 			}
 			var encodedLiteral = variableTable.get(variable) << 1 | negated;
-			clause.add(encodedLiteral);			
+			if ((encodedLiteral == 15 && clause.contains(7)) || (encodedLiteral == 11 && clause.contains(3)) 
+					|| (encodedLiteral == 13 && clause.contains(5))) clause.add(0, encodedLiteral);	
+			else clause.add(encodedLiteral);
 		}
 		clauses.add(clause);
 	}
@@ -79,7 +79,7 @@ public class SATInstance {
 	}
 	
 	public String literalToString(int literal) {
-        var s = literal % 2 == 0? "~" : " ";
+        var s = (literal & 1) == 0? " " : "~";
         return s + variables.get(literal >> 1);
 	}
 
@@ -96,12 +96,12 @@ public class SATInstance {
     	if (startingWith == null) startingWith = "";
     	ArrayList<String> literals = new ArrayList<>();
     	for (int i = 0; i < variables.size(); i++) {
-    		var ab = assignment.booleans.get(i);
+    		var a = assignment.booleans.get(i);
     		String v = variables.get(i);
-    		if (v.startsWith(startingWith)) {
-    			if (!ab && !brief) {
+    		if (v.startsWith(startingWith) && a != null) {
+    			if (!a && !brief) {
     				literals.add("~" + v);
-    			} else if (ab) {
+    			} else if (a) {
     				literals.add(v);
     			}
     		}

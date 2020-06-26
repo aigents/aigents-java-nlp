@@ -25,15 +25,20 @@
 package org.aigents.nlp.sat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Solve {
-	public static ArrayList<Assignment> solve(SATInstance instance, WatchlistInstance watchlist, Assignment assignment, int d, boolean verbose) {
+	public static ArrayList<ArrayList<Boolean>> solve(SATInstance instance, WatchlistInstance watchlist, Assignment assignment, int d, boolean verbose) {
 		int n = instance.getVariables().size();
 		int[] state = new int[n];
-		ArrayList<Assignment> ret = new ArrayList<>();
+		ArrayList<ArrayList<Boolean>> ret = new ArrayList<>();
 		while (true) {
-			if (d == n) {
-				ret.add(assignment);
+			if (d == n) {		
+				ArrayList<Boolean> b = new ArrayList<>();
+				for (boolean bool : assignment.booleans) {
+					b.add(bool);
+				}
+				ret.add(b);
 				d -= 1;
 				continue;
 			}

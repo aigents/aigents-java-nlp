@@ -28,12 +28,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class WatchlistInstance {
-	public ArrayList<LinkedList<ArrayList<Integer>>> watchlist;
+	public ArrayList<ArrayList<ArrayList<Integer>>> watchlist;
 	
 	public WatchlistInstance(SATInstance instance) {
 		watchlist = new ArrayList<>();
 		for (int i = 0; i < 2 * instance.getVariables().size(); i++) {
-			watchlist.add(new LinkedList<>());
+			watchlist.add(new ArrayList<>());
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return watchlist.toString();
 	}
 }

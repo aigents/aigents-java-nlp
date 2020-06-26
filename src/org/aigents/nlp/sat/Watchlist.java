@@ -41,6 +41,7 @@ public class Watchlist {
 		String literalString = "", clausesString = "";
 		for (int l = 0; l < watchlist.watchlist.size(); l++) {
 			var w = watchlist.watchlist.get(l);
+			System.err.println(l + ", " + w);
 			literalString = instance.literalToString(l);
 			clausesString = "";
 			for (int i = 0; i < w.size() - 1; i++) {
@@ -48,8 +49,8 @@ public class Watchlist {
 				clausesString += instance.clauseToString(c) + ", ";
 			}
 			if (w.size() > 0) clausesString += instance.clauseToString(w.get(w.size() - 1));
+			System.err.println(literalString + ": " + clausesString);
 		}
-		System.err.println(literalString + ": " + clausesString);
 	}
 	
 	public static boolean updateWatchlist(SATInstance instance, WatchlistInstance watchlist, 

@@ -29,15 +29,16 @@ import java.util.ArrayList;
 
 public class SATSolver {
 	public static void main(String[] args) throws IOException {
-		SATInstance instance = SATInstance.fromFile("test.txt"); // args[0] -> path
-		ArrayList<Assignment> assignments = generateAssignments(instance, true); // instance, args[1] -> verbose
+		SATInstance instance = SATInstance.fromFile("test2.txt"); // args[0] -> path
+		boolean verbose = false; // args[1]
+		ArrayList<ArrayList<Boolean>> assignments = generateAssignments(instance, verbose); //
 		int count = 0;
-		for (Assignment a : assignments) {
+		for (ArrayList<Boolean> a : assignments) {
 			count++;
-			if (true) { // args[1]
+			if (verbose) { 
 				System.err.println("Found satisfying assignment #" + count);
 			}
-			String assignmentStr = instance.assignmentToString(a, true, null); // a, args[2] -> brief
+			String assignmentStr = instance.assignmentToString(new Assignment(a), true, null); // a, args[2] -> brief
 			System.out.println(assignmentStr);
 		}
 		if (true && count == 0) { // args[1]
@@ -45,7 +46,7 @@ public class SATSolver {
 		}
 	}
 	
-	private static ArrayList<Assignment> generateAssignments(SATInstance instance, boolean verbose) {
+	private static ArrayList<ArrayList<Boolean>> generateAssignments(SATInstance instance, boolean verbose) {
 		int n = instance.getVariables().size();
 		WatchlistInstance watchlist = Watchlist.setupWatchlist(instance);
 		Assignment a = new Assignment();
