@@ -29,8 +29,14 @@ import java.util.ArrayList;
 
 public class SATSolver {
 	public static void main(String[] args) throws IOException {
-		SATInstance instance = SATInstance.fromFile(args[0]);
+		String path = args[0];
 		boolean verbose = Boolean.valueOf(args[1]);
+		boolean brief = Boolean.valueOf(args[2]);
+		outputAssignments(path, verbose, brief);
+	}
+	
+	public static void outputAssignments(String path, boolean verbose, boolean brief) throws IOException {
+		SATInstance instance = SATInstance.fromFile(path);
 		ArrayList<ArrayList<Boolean>> assignments = generateAssignments(instance, verbose);
 		int count = 0;
 		for (ArrayList<Boolean> a : assignments) {
@@ -38,7 +44,7 @@ public class SATSolver {
 			if (verbose) { 
 				System.err.println("Found satisfying assignment #" + count);
 			}
-			String assignmentStr = instance.assignmentToString(new Assignment(a), Boolean.valueOf(args[2]), null);
+			String assignmentStr = instance.assignmentToString(new Assignment(a), brief, null);
 			System.out.println(assignmentStr);
 		}
 		if (verbose && count == 0) {

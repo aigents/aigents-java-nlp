@@ -30,12 +30,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
 import org.aigents.nlp.lg.Dictionary;
+import org.aigents.nlp.lg.Disjunct;
 import org.aigents.nlp.lg.Loader;
-
+import org.aigents.nlp.lg.Rule;
 
 public class Generator {
 	public static void main(String[] args) throws IOException {
@@ -46,15 +48,243 @@ public class Generator {
 				System.err.println("Error loading and tokenizing sentences.");
 				return;
 			}
-			System.out.println(generateSentence(words.get(0)));
+			for (String[] w : words) {
+				System.out.println(Arrays.toString(w) + ": " + generateSentence(w, dict));
+			}
 		} else {
 			System.out.println("No command line parameters given.");
 		}
+		Dictionary dict = Loader.grammarBuildLinks("dict_30C_2018-12-31_0006.4.0.dict", true);
+		List<String[]> words = processSentences("poc_english.txt");
+		if (words == null) {
+			System.err.println("Error loading and tokenizing sentences.");
+			return;
+		}
+		for (String[] w : words) {
+			System.out.println(Arrays.toString(w) + ": " + generateSentence(w, dict));
+		}
 	}
 	
-	public static String generateSentence(String[] words) {
-		
-		return null;
+	public static HashSet<String> generateSentence(String[] elements, Dictionary dict) {
+		boolean not = false;
+		HashSet<String> ret = new HashSet<>();
+		int n = elements.length;
+		int[] indexes = new int[n];
+		for (int i = 0; i < n; i++) {
+		    indexes[i] = 0;
+		} 
+		ArrayList<String> w = new ArrayList<>(Arrays.asList(elements));
+		if (w.contains("not") && w.contains("a")) {
+			not = true;
+			w.remove("not");
+			int i = 0;
+			String[] input = new String[w.size()];
+			for (String word : w) {
+				input[i] = word;
+				i++;
+			}
+			if (isValid(input, dict)) {
+				String str = makeSentence(input);
+				str = str.replace(" a", " not a");
+				ret.add(str);
+			}
+		} else {
+			if (isValid(elements, dict)) {
+				ret.add(makeSentence(elements));
+			}
+		}
+		int i = 0;
+		while (i < n) {
+		    if (indexes[i] < i) {
+		        swap(elements, i % 2 == 0 ?  0: indexes[i], i);
+				if (not) {
+					int idx = 0;
+					String[] input = new String[w.size()];
+					for (String word : w) {
+						input[idx] = word;
+						idx++;
+					}
+					if (isValid(input, dict)) {
+						String str = makeSentence(input);
+						str = str.replace(" a", " not a");
+						ret.add(str);
+					}
+				} else {
+					if (isValid(elements, dict)) {
+						ret.add(makeSentence(elements));
+					}
+				}
+		        indexes[i]++;
+		        i = 0;
+		    }
+		    else {
+		        indexes[i] = 0;
+		        i++;
+		    }
+		}
+		return ret;
+	}
+	
+	private static boolean connects(String left, String right, Dictionary dict) {
+		Rule leftRule = dict.getRule(left.toLowerCase());
+    	Rule rightRule = dict.getRule(right.toLowerCase());
+    	for (Disjunct dl : leftRule.getDisjuncts()) {
+    		for (Disjunct dr : rightRule.getDisjuncts()) {
+    			String wl = "";
+    			String wr = "";
+    			if (dl.getConnectors().size() > 1) {
+    				for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
+	    				String c = dl.getConnectors().get(ci);
+	    				if (!c.contains("-")) {
+	    					wl += c + " & ";
+	    				}
+	    			}
+    				String c = dl.getConnectors().get(dl.getConnectors().size() - 1);
+    				if (!c.contains("-")) {
+    					wl += c;
+    				} else {
+    					if (wl.contains("&")) wl = wl.substring(0, wl.length() - 3);
+    				}
+    			} else {
+    				wl = dl.getConnectors().get(0);
+    			}
+    			if (dr.getConnectors().size() > 1) {
+    				for (int ci = 0; ci < dr.getConnectors().size() - 1; ci++) {
+	    				String c = dr.getConnectors().get(ci);
+	    				if (c.contains("-")) {
+	    					wr += c + " & ";
+	    				}
+	    			}
+    				String c = dr.getConnectors().get(dr.getConnectors().size() - 1);
+    				if (c.contains("-")) {
+    					wr += c;
+    				} else {
+    					if (wr.contains("&")) wr = wr.substring(0, wr.length() - 3);
+    				}
+    			} else {
+    				wr = dr.getConnectors().get(0);
+    			}    			
+    			String wlu = wl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+    			if (wlu.equals(wr)) {
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+	}
+	
+	private static boolean connects(String left, String mid, String right, Dictionary dict) {
+		Rule leftRule = dict.getRule(left.toLowerCase());
+		Rule midRule = dict.getRule(left.toLowerCase());
+    	Rule rightRule = dict.getRule(right.toLowerCase());
+    	boolean leftTrue = false;
+    	boolean midTrue = false;
+    	for (Disjunct dr : rightRule.getDisjuncts()) {
+    		String wr = "";
+    		if (dr.getConnectors().size() > 1) {
+				for (int ci = 0; ci < dr.getConnectors().size() - 1; ci++) {
+    				String c = dr.getConnectors().get(ci);
+    				if (c.contains("-")) {
+    					wr += c + " & ";
+    				}
+    			}
+				String c = dr.getConnectors().get(dr.getConnectors().size() - 1);
+				if (c.contains("-")) {
+					wr += c;
+				} else {
+					if (wr.contains("&")) wr = wr.substring(0, wr.length() - 3);
+				}
+			} else {
+				wr = dr.getConnectors().get(0);
+			}
+    		for (Disjunct dl : leftRule.getDisjuncts()) {
+    			for (Disjunct dm : midRule.getDisjuncts()) {
+    				if (!wr.contains("&")) return false;
+    				String[] parts = wr.split(" & ");
+    				for (String part : parts) {
+    					String wl = "";
+    	    			if (dl.getConnectors().size() > 1) {
+    	    				for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
+    		    				String c = dl.getConnectors().get(ci);
+    		    				if (!c.contains("-")) {
+    		    					wl += c + " & ";
+    		    				}
+    		    			}
+    	    				String c = dl.getConnectors().get(dl.getConnectors().size() - 1);
+    	    				if (!c.contains("-")) {
+    	    					wl += c;
+    	    				} else {
+    	    					if (wl.contains("&")) wl = wl.substring(0, wl.length() - 3);
+    	    				}
+    	    			} else {
+    	    				wl = dl.getConnectors().get(0);
+    	    			}
+    	    			String wm = "";
+    	    			if (dm.getConnectors().size() > 1) {
+    	    				for (int ci = 0; ci < dm.getConnectors().size() - 1; ci++) {
+    		    				String c = dm.getConnectors().get(ci);
+    		    				if (!c.contains("-")) {
+    		    					wm += c + " & ";
+    		    				}
+    		    			}
+    	    				String c = dm.getConnectors().get(dm.getConnectors().size() - 1);
+    	    				if (!c.contains("-")) {
+    	    					wm += c;
+    	    				} else {
+    	    					if (wm.contains("&")) wm = wm.substring(0, wm.length() - 3);
+    	    				}
+    	    			} else {
+    	    				wm = dm.getConnectors().get(0);
+    	    			}
+    	    			String wlu = wl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+    	    			String wmu = wm.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+    	    			if (wlu.equals(part)) leftTrue = true;
+    	    			if (wmu.equals(part)) midTrue = true;
+    				}
+    			}
+    		}
+    	}
+    	return leftTrue && midTrue;
+	}
+	
+	private static boolean contains(String[] input, String str) {
+		for (String s : input) {
+			if (s.equals(str)) return true;
+		}
+		return false;
+	}
+
+	private static boolean isValid(String[] input, Dictionary dict) {
+	    outer: for (int i = 0; i < input.length - 1; i++) {
+	    	String left = input[i];
+	    	String right = input[i+1];
+	    	if ((right.equals("a") || right.equals("the"))  && i+2 < input.length) {
+	    		i++;
+	    		if ((connects(left, input[i+1], dict) && connects(right, input[i+1], dict)) 
+	    				|| connects(left, right, input[i+1], dict)) continue outer;
+	    	} else if (right.equals("before") && !contains(input, "a") && i >= 1) {
+	    		if (connects(input[i-1], right, dict)) continue outer;
+	    	} else {
+		    	if (connects(left, right, dict)) continue outer;
+	    	}
+	    	return false;
+	    }
+	    return true;
+	}
+
+	private static void swap(String[] input, int a, int b) {
+	    String tmp = input[a];
+	    input[a] = input[b];
+	    input[b] = tmp;
+	}
+	
+	private static String makeSentence(String[] arr) {
+		String ret = "";
+		for (int i = 0; i < arr.length - 1; i++) {
+			ret += arr[i] + " ";
+		}
+		ret += arr[arr.length - 1] + ".";
+		return ret;
 	}
 	
 	public static List<String[]> processSentences(String path) throws IOException {
