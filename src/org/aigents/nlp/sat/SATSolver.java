@@ -1,0 +1,64 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2020-Present by Vignav Ramesh and Anton Kolonin, Aigents®
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package org.aigents.nlp.sat;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class SATSolver {
+	public static void main(String[] args) throws IOException {
+		String path = args[0];
+		boolean verbose = Boolean.valueOf(args[1]);
+		boolean brief = Boolean.valueOf(args[2]);
+		outputAssignments(path, verbose, brief);
+	}
+	
+	public static void outputAssignments(String path, boolean verbose, boolean brief) throws IOException {
+		SATInstance instance = SATInstance.fromFile(path);
+		ArrayList<ArrayList<Boolean>> assignments = generateAssignments(instance, verbose);
+		int count = 0;
+		for (ArrayList<Boolean> a : assignments) {
+			count++;
+			if (verbose) { 
+				System.err.println("Found satisfying assignment #" + count);
+			}
+			String assignmentStr = instance.assignmentToString(new Assignment(a), brief, null);
+			System.out.println(assignmentStr);
+		}
+		if (verbose && count == 0) {
+			System.err.println("No satisfying assignment exists.");
+		}
+	}
+	
+	private static ArrayList<ArrayList<Boolean>> generateAssignments(SATInstance instance, boolean verbose) {
+		int n = instance.getVariables().size();
+		WatchlistInstance watchlist = Watchlist.setupWatchlist(instance);
+		Assignment a = new Assignment();
+		for (int i = 0; i < n; i++) {
+			a.booleans.add(null);
+		}
+		return Solve.solve(instance, watchlist, a, 0, verbose);
+	}
+}
