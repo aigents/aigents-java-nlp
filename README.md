@@ -3,7 +3,9 @@ Natural language processing components and tools for [Aigents](https://aigents.c
 
 To build the project, run `ant war` in the command line.
 
-To test `Generator.java`, run 
+To test `Generator.java`, choose one of the following two options:
+
+1) Run 
 
     cd src
     javac org/aigents/nlp/lg/*.java
@@ -11,6 +13,15 @@ To test `Generator.java`, run
     java org.aigents.nlp.sat.Generator dict_30C_2018-12-31_0006.4.0.dict poc_english.txt
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified the second argument (`poc_english.txt` in the line above).
+
+2) Run 
+
+    cd src
+    javac org/aigents/nlp/lg/*.java
+    javac org/aigents/nlp/sat/*.java
+    java org.aigents.nlp.sat.Generator dict_30C_2018-12-31_0006.4.0.dict food Cake a is now
+    
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and will then generate a grammatically valid sentence from the words given in the subsequent arguments (`food`, `Cake`, `a`, `is`, and `now` in the line above).
 
 To test `SATSolver.java`, run 
 
