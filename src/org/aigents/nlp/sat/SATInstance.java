@@ -45,7 +45,7 @@ public class SATInstance {
 	
 	public void parseAndAddClause(String line) {
 		ArrayList<Integer> clause = new ArrayList<>();
-		for (var literal : line.split(" ")) {
+		for (String literal : line.split(" ")) {
 			int negated = literal.startsWith("~")? 1 : 0;
 			String variable = "";
 			for (int i = negated; i < literal.length(); i++) {
@@ -55,7 +55,7 @@ public class SATInstance {
 				variableTable.put(variable, variables.size());
 				variables.add(variable);
 			}
-			var encodedLiteral = variableTable.get(variable) << 1 | negated;
+			int encodedLiteral = variableTable.get(variable) << 1 | negated;
 			if ((encodedLiteral == 15 && clause.contains(7)) || (encodedLiteral == 11 && clause.contains(3)) 
 					|| (encodedLiteral == 13 && clause.contains(5))) clause.add(0, encodedLiteral);	
 			else clause.add(encodedLiteral);
@@ -69,7 +69,7 @@ public class SATInstance {
 		File f = new File(url.getPath());
 		if (!f.exists()) return null;
 		List<String> list = Files.readAllLines(f.toPath());
-		for (var line : list) {
+		for (String line : list) {
 			line = line.replaceAll("^[ \t]+|[ \t]+$", "");
 			if (line.length() > 0 && !line.startsWith("#")) {
 				instance.parseAndAddClause(line);
@@ -79,7 +79,7 @@ public class SATInstance {
 	}
 	
 	public String literalToString(int literal) {
-        var s = (literal & 1) == 0? " " : "~";
+        String s = (literal & 1) == 0? " " : "~";
         return s + variables.get(literal >> 1);
 	}
 
@@ -96,9 +96,9 @@ public class SATInstance {
     	if (startingWith == null) startingWith = "";
     	ArrayList<String> literals = new ArrayList<>();
     	for (int i = 0; i < variables.size(); i++) {
-    		var a = assignment.booleans.get(i);
+    		boolean a = assignment.booleans.get(i);
     		String v = variables.get(i);
-    		if (v.startsWith(startingWith) && a != null) {
+    		if (v.startsWith(startingWith)) { // && a != null
     			if (!a && !brief) {
     				literals.add("~" + v);
     			} else if (a) {

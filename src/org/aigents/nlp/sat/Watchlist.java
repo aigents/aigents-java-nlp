@@ -40,12 +40,12 @@ public class Watchlist {
 		System.err.println("Current watchlist:");
 		String literalString = "", clausesString = "";
 		for (int l = 0; l < watchlist.watchlist.size(); l++) {
-			var w = watchlist.watchlist.get(l);
+			ArrayList<ArrayList<Integer>> w = watchlist.watchlist.get(l);
 			System.err.println(l + ", " + w);
 			literalString = instance.literalToString(l);
 			clausesString = "";
 			for (int i = 0; i < w.size() - 1; i++) {
-				var c = w.get(i);
+				ArrayList<Integer> c = w.get(i);
 				clausesString += instance.clauseToString(c) + ", ";
 			}
 			if (w.size() > 0) clausesString += instance.clauseToString(w.get(w.size() - 1));
@@ -57,12 +57,12 @@ public class Watchlist {
 			int falseLiteral, Assignment assignment, boolean verbose) {
 		int count = 0;
 		HashMap<Integer, ArrayList<Integer>> toAdd = new HashMap<>();
-		for (var i : watchlist.watchlist.get(falseLiteral)) {
-			var clause = watchlist.watchlist.get(falseLiteral).get(count);
+		for (ArrayList<Integer> i : watchlist.watchlist.get(falseLiteral)) {
+			ArrayList<Integer> clause = watchlist.watchlist.get(falseLiteral).get(count);
 			boolean foundAlternative = false;
-			for (var alternative : clause) {
-				var v = alternative >> 1;
-				var a = alternative & 1;
+			for (int alternative : clause) {
+				int v = alternative >> 1;
+				int a = alternative & 1;
 				if (assignment.booleans.get(v) == null || assignment.booleans.get(v) == ((a ^ 1) == 0? false : true)) {
 					foundAlternative = true;
 					count++;

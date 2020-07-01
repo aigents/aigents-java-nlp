@@ -43,7 +43,7 @@ public class Solve {
 				continue;
 			}
 			boolean triedSomething = false;
-			for (var a : new int[] {0, 1}) {
+			for (int a : new int[] {0, 1}) {
 				if (((state[d] >> a) & 1) == 0) {
 					if (verbose) {
 						System.err.println("Trying " + instance.getVariables().get(d) + " = " + a);
