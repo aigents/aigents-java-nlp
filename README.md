@@ -14,7 +14,7 @@ To use the sentences provided in the file `poc_english.txt`, run
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified the second argument (`poc_english.txt` in the line above).
 
-To use custom words (must be part of the small grammar corpus `dict_30C_2018-12-31_0006.4.0.dict poc_english.txt` for now, larger dictionaries will be added in future iterations), run
+To use custom words (must be part of the small grammar corpus `dict_30C_2018-12-31_0006.4.0.dict` for now, larger dictionaries will be added in future iterations), run
 
     cd src
     javac org/aigents/nlp/lg/*.java
