@@ -42,22 +42,30 @@ import org.aigents.nlp.lg.Rule;
 public class Generator {
 	public static void main(String[] args) throws IOException {
 		if (args.length == 2) {
-			Dictionary dict = Loader.grammarBuildLinks(args[0], true);
-			List<String[]> words = processSentences(args[1]);
-			if (words == null) {
-				System.err.println("Error loading and tokenizing sentences.");
-				return;
-			}
-			for (String[] w : words) {
-				System.out.println(Arrays.toString(w) + ": " + generateSentence(w, dict));
+			try {
+				Dictionary dict = Loader.grammarBuildLinks(args[0], true);
+				List<String[]> words = processSentences(args[1]);
+				if (words == null) {
+					System.err.println("Error loading and tokenizing sentences.");
+					return;
+				}
+				for (String[] w : words) {
+					System.out.println(Arrays.toString(w) + ": " + generateSentence(w, dict));
+				}
+			} catch (Exception e) {
+				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
 		} else if (args.length > 2) {
-			Dictionary dict = Loader.grammarBuildLinks(args[0], true);
-			String[] words = new String[args.length - 1];
-			for (int i = 1; i < args.length; i++) {
-				words[i-1] = args[i];
+			try {
+				Dictionary dict = Loader.grammarBuildLinks(args[0], true);
+				String[] words = new String[args.length - 1];
+				for (int i = 1; i < args.length; i++) {
+					words[i-1] = args[i];
+				}
+				System.out.println(Arrays.toString(words) + ": " + generateSentence(words, dict));
+			} catch (Exception e) {
+				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
-			System.out.println(Arrays.toString(words) + ": " + generateSentence(words, dict));
 		} else {
 			System.out.println("No command line parameters given.");
 		}
@@ -210,8 +218,17 @@ public class Generator {
 	}
 	
 	private static boolean connects(String left, String right, Dictionary dict) {
-		Rule leftRule = dict.getRule(left.toLowerCase());
-    	Rule rightRule = dict.getRule(right.toLowerCase());
+		Rule leftRule = new Rule(), rightRule = new Rule();
+		try {
+			leftRule = dict.getRule(left.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + left + "' not found in dictionary.");
+		}
+		try {
+			rightRule = dict.getRule(right.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + right + "' not found in dictionary.");
+		}
     	for (Disjunct dl : leftRule.getDisjuncts()) {
     		for (Disjunct dr : rightRule.getDisjuncts()) {
     			String wl = "";
@@ -258,9 +275,22 @@ public class Generator {
 	}
 	
 	private static boolean connects(String left, String mid, String right, Dictionary dict) {
-		Rule leftRule = dict.getRule(left.toLowerCase());
-		Rule midRule = dict.getRule(mid.toLowerCase());
-    	Rule rightRule = dict.getRule(right.toLowerCase());
+		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule();
+		try {
+			leftRule = dict.getRule(left.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + left + "' not found in dictionary.");
+		}
+		try {
+			midRule = dict.getRule(mid.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + mid + "' not found in dictionary.");
+		}
+		try {
+			rightRule = dict.getRule(right.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + right + "' not found in dictionary.");
+		}
     	boolean leftTrue = false;
     	boolean midTrue = false;
     	for (Disjunct dr : rightRule.getDisjuncts()) {
@@ -332,9 +362,22 @@ public class Generator {
 	}
 	
 	private static boolean connectsLeft(String left, String mid, String right, Dictionary dict) {
-		Rule leftRule = dict.getRule(left.toLowerCase());
-		Rule midRule = dict.getRule(mid.toLowerCase());
-    	Rule rightRule = dict.getRule(right.toLowerCase());
+		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule();
+		try {
+			leftRule = dict.getRule(left.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + left + "' not found in dictionary.");
+		}
+		try {
+			midRule = dict.getRule(mid.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + mid + "' not found in dictionary.");
+		}
+		try {
+			rightRule = dict.getRule(right.toLowerCase());
+		} catch (Exception e) {
+			System.err.println("Word '" + right + "' not found in dictionary.");
+		}
     	boolean midTrue = false;
     	boolean rightTrue = false;
     	for (Disjunct dl : leftRule.getDisjuncts()) {
@@ -413,7 +456,6 @@ public class Generator {
 	}
 
 	private static boolean isValid(String[] input, Dictionary dict) {
-		System.out.println(Arrays.toString(input));
 	    outer: for (int i = 0; i < input.length - 1; i++) {
 	    	String left = input[i];
 	    	String right = input[i+1];
@@ -466,20 +508,24 @@ public class Generator {
 	}
 	
 	public static List<String[]> processSentences(String path) throws IOException {
-		URL url = new Generator().getClass().getResource(path);
-		File f = new File(url.getPath());
-		if (!f.exists()) return null;
-		List<String> sentences = Files.readAllLines(f.toPath());
-		Iterator<String> it = sentences.iterator();
-		while (it.hasNext()) {
-			if (it.next().isEmpty()) it.remove();
+		try {
+			URL url = new Generator().getClass().getResource(path);
+			File f = new File(url.getPath());
+			if (!f.exists()) return null;
+			List<String> sentences = Files.readAllLines(f.toPath());
+			Iterator<String> it = sentences.iterator();
+			while (it.hasNext()) {
+				if (it.next().isEmpty()) it.remove();
+			}
+			List<String[]> words = new ArrayList<>();
+			for (String sentence : sentences) {
+				String[] w = sentence.split(" ");
+				w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
+				words.add(w);
+			}
+			return words;
+		} catch (Exception e) {
+			return null;
 		}
-		List<String[]> words = new ArrayList<>();
-		for (String sentence : sentences) {
-			String[] w = sentence.split(" ");
-			w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
-			words.add(w);
-		}
-		return words;
 	}
 }
