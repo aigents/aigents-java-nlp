@@ -138,10 +138,17 @@ public class Generator {
     while (i < n) {
         if (indexes[i] < i) {
             swap(elements, i % 2 == 0 ?  0: indexes[i], i);
+            ArrayList<String> w2 = new ArrayList<>(Arrays.asList(elements));
+            if (w2.contains("not") && w2.contains("a")) {
+          w2.remove("not");
+        } 
+        if (w2.contains("now") && w2.contains("a")) {
+          w2.remove("now");
+        } 
             if (not || now) {
           int id = 0;
-          String[] input = new String[w.size()];
-          for (String word : w) {
+          String[] input = new String[w2.size()];
+          for (String word : w2) {
             input[id] = word;
             id++;
           }
@@ -406,6 +413,7 @@ public class Generator {
   }
 
   private static boolean isValid(String[] input, Dictionary dict) {
+    System.out.println(Arrays.toString(input));
       outer: for (int i = 0; i < input.length - 1; i++) {
         String left = input[i];
         String right = input[i+1];
