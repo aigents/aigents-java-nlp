@@ -221,13 +221,17 @@ public class Generator {
 		Rule leftRule = new Rule(), rightRule = new Rule();
 		try {
 			leftRule = dict.getRule(left.toLowerCase());
+			if (leftRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + left + "' not found in dictionary.");
+			System.exit(0);
 		}
 		try {
 			rightRule = dict.getRule(right.toLowerCase());
+			if (rightRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + right + "' not found in dictionary.");
+			System.exit(0);
 		}
     	for (Disjunct dl : leftRule.getDisjuncts()) {
     		for (Disjunct dr : rightRule.getDisjuncts()) {
@@ -278,18 +282,24 @@ public class Generator {
 		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule();
 		try {
 			leftRule = dict.getRule(left.toLowerCase());
+			if (leftRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + left + "' not found in dictionary.");
+			System.exit(0);
 		}
 		try {
 			midRule = dict.getRule(mid.toLowerCase());
+			if (midRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + mid + "' not found in dictionary.");
+			System.exit(0);
 		}
 		try {
 			rightRule = dict.getRule(right.toLowerCase());
+			if (rightRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + right + "' not found in dictionary.");
+			System.exit(0);
 		}
     	boolean leftTrue = false;
     	boolean midTrue = false;
@@ -365,18 +375,24 @@ public class Generator {
 		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule();
 		try {
 			leftRule = dict.getRule(left.toLowerCase());
+			if (leftRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + left + "' not found in dictionary.");
+			System.exit(0);
 		}
 		try {
 			midRule = dict.getRule(mid.toLowerCase());
+			if (midRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + mid + "' not found in dictionary.");
+			System.exit(0);
 		}
 		try {
 			rightRule = dict.getRule(right.toLowerCase());
+			if (rightRule == null) throw new Exception();
 		} catch (Exception e) {
 			System.err.println("Word '" + right + "' not found in dictionary.");
+			System.exit(0);
 		}
     	boolean midTrue = false;
     	boolean rightTrue = false;
