@@ -45,6 +45,11 @@ Dad writes with chalk on the board.
 Son writes with chalk on the board.
 Daughter writes with chalk on the board.
 
+Mom writes to Dad with chalk on the board.
+Dad writes to Mom with chalk on the board.
+Son writes to Dad with chalk on the board.
+Daughter writes to Mom with chalk on the board.
+
 Mom has a hammer.
 Mom has a saw.
 Dad has a hammer.
