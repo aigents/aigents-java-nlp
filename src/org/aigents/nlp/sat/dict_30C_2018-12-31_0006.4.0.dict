@@ -120,7 +120,7 @@
 
 % BF
 "writes":
-(ACBF- & BFBA+ & BFBD+ & BFAX+) or (ACBF- & BFBD+ & BFAX+);
+(ACBF- & BFBA+ & BFBD+) or (ACBF- & BFBD+ & BFAX+);
 
 <UNKNOWN-WORD>: XXX+;
 
