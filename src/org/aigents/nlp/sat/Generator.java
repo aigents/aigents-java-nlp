@@ -99,8 +99,6 @@ public class Generator {
 			if (now && !not) {
 				if (isValid(input, dict)) {
 					String str = makeSentence(input);
-					String str2 = str.replace(" a ", " now a ");
-					ret.add(str2);
 					int nowId = 0;
 					String[] parts = str.split(" ");
 					for (int m = 0; m < parts.length; m++) {
@@ -122,7 +120,6 @@ public class Generator {
 			if (not && now) {
 				if (isValid(input, dict)) {
 					String str = makeSentence(input);
-					String str2 = str.replace(" a ", " now a ");
 					int nowId = 0;
 					String[] parts = str.split(" ");
 					for (int m = 0; m < parts.length; m++) {
@@ -131,9 +128,7 @@ public class Generator {
 						}
 					}
 					String str3 = str.substring(0, nowId) + " now" + str.substring(nowId);
-					str2 = str2.replace(" a", " not a");
 					str3 = str3.replace(" a", " not a");
-					ret.add(str2);
 					ret.add(str3);
 				}
 			}
@@ -163,8 +158,6 @@ public class Generator {
 					if (now && !not) {
 						if (isValid(input, dict)) {
 							String str = makeSentence(input);
-							String str2 = str.replace(" a ", " now a ");
-							ret.add(str2);
 							int nowId = 0;
 							String[] parts = str.split(" ");
 							for (int m = 0; m < parts.length; m++) {
@@ -186,7 +179,6 @@ public class Generator {
 					if (not && now) {
 						if (isValid(input, dict)) {
 							String str = makeSentence(input);
-							String str2 = str.replace(" a ", " now a ");
 							int nowId = 0;
 							String[] parts = str.split(" ");
 							for (int m = 0; m < parts.length; m++) {
@@ -195,9 +187,7 @@ public class Generator {
 								}
 							}
 							String str3 = str.substring(0, nowId) + " now" + str.substring(nowId);
-							str2 = str2.replace(" a", " not a");
 							str3 = str3.replace(" a", " not a");
-							ret.add(str2);
 							ret.add(str3);
 						}
 					}
@@ -303,6 +293,8 @@ public class Generator {
 		}
     	boolean leftTrue = false;
     	boolean midTrue = false;
+    	int leftId = 0;
+    	int midId = 0;
     	for (Disjunct dr : rightRule.getDisjuncts()) {
     		String wr = "";
     		if (dr.getConnectors().size() > 1) {
@@ -325,7 +317,8 @@ public class Generator {
     		for (Disjunct dl : leftRule.getDisjuncts()) {
     			for (Disjunct dm : midRule.getDisjuncts()) {
     				String[] parts = wr.split(" & ");
-    				for (String part : parts) {
+    				for (int idp = 0; idp < parts.length; idp++) {
+    					String part = parts[idp];
     					String wl = "";
     	    			if (dl.getConnectors().size() > 1) {
     	    				for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
@@ -362,13 +355,19 @@ public class Generator {
     	    			}
     	    			String wlu = wl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
     	    			String wmu = wm.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-    	    			if (wlu.equals(part)) leftTrue = true;
-    	    			if (wmu.equals(part)) midTrue = true;
+    	    			if (wlu.equals(part)) {
+    	    				leftTrue = true;
+    	    				leftId = idp;
+    	    			}
+    	    			if (wmu.equals(part)) {
+    	    				midTrue = true;
+    	    				midId = idp;
+    	    			}
     				}
     			}
     		}
     	}
-    	return leftTrue && midTrue;
+    	return leftTrue && midTrue && midId < leftId;
 	}
 	
 	private static boolean connectsLeft(String left, String mid, String right, Dictionary dict) {
@@ -396,6 +395,8 @@ public class Generator {
 		}
     	boolean midTrue = false;
     	boolean rightTrue = false;
+    	int rightId = 0;
+    	int midId = 0;
     	for (Disjunct dl : leftRule.getDisjuncts()) {
     		String wl = "";
     		if (dl.getConnectors().size() > 1) {
@@ -418,7 +419,8 @@ public class Generator {
     		for (Disjunct dr : rightRule.getDisjuncts()) {
     			for (Disjunct dm : midRule.getDisjuncts()) {
     				String[] parts = wl.split(" & ");
-    				for (String part : parts) {
+    				for (int idp = 0; idp < parts.length; idp++) {
+    					String part = parts[idp];
     					String wr = "";
     	    			if (dr.getConnectors().size() > 1) {
     	    				for (int ci = 0; ci < dr.getConnectors().size() - 1; ci++) {
@@ -455,13 +457,19 @@ public class Generator {
     	    			}
     	    			String wru = wr.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
     	    			String wmu = wm.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-    	    			if (wru.equals(part)) rightTrue = true;
-    	    			if (wmu.equals(part)) midTrue = true;
+    	    			if (wru.equals(part)) {
+    	    				rightTrue = true;
+    	    				rightId = idp;
+    	    			}
+    	    			if (wmu.equals(part)) {
+    	    				midTrue = true;
+    	    				midId = idp;
+    	    			}
     				}
     			}
     		}
     	}
-    	return rightTrue && midTrue;
+    	return rightTrue && midTrue && midId < rightId;
 	}
 	
 	private static boolean contains(String[] input, String str) {
