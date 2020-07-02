@@ -42,16 +42,44 @@ import org.aigents.nlp.lg.Rule;
 public class Generator {
 	public static void main(String[] args) throws IOException {
 		if (args.length == 2) {
+			int correctCases = 0;
 			try {
 				Dictionary dict = Loader.grammarBuildLinks(args[0], true);
+				List<String> list = getList(args[1]);
 				List<String[]> words = processSentences(args[1]);
 				if (words == null) {
 					System.err.println("Error loading and tokenizing sentences.");
 					return;
 				}
+				int idx = -1;
 				for (String[] w : words) {
-					System.out.println(Arrays.toString(w) + ": " + generateSentence(w, dict));
+					idx++;
+					HashSet<String> sentence = generateSentence(w, dict);
+					System.out.println(Arrays.toString(w) + ": " + sentence);
+					String s = list.get(idx);
+					if (sentence.size() > 1) {
+						for (String sen2 : sentence) {
+							if (sen2.equals(s)) continue;
+							String sen = sen2.substring(0, sen2.length() - 1);
+							String[] senParts = sen.split(" ");
+							String[] sParts = s.substring(0, s.length() - 1).split(" ");
+							ArrayList<String> mismatches = new ArrayList<>();
+							for (int i = 0; i < sParts.length; i++) {
+								if (!senParts[i].equals(sParts[i])) {
+									mismatches.add(senParts[i]);
+								}
+							}
+							System.out.println("      The words " + mismatches + " are in the wrong place.");
+							System.out.println("      While the sentence \"" + sen2 + "\" is grammatically valid, it is contextually wrong.");
+						}
+					} else {
+						for (String sen : sentence) {
+							if (sen.equals(s)) correctCases++;
+						}
+					}
 				}
+				System.out.println("Correct cases: " + correctCases + "/" + words.size());
+				System.out.println("Accuracy: " + ((double) correctCases)/words.size());
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
@@ -478,8 +506,157 @@ public class Generator {
 		}
 		return false;
 	}
+	
+	private static boolean connectsFour(String left, String mid, String right, String next, Dictionary dict) {
+		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule(), nextRule = new Rule();
+		try {
+			leftRule = dict.getRule(left.toLowerCase());
+			if (leftRule == null) throw new Exception();
+		} catch (Exception e) {
+			System.err.println("Word '" + left + "' not found in dictionary.");
+			System.exit(0);
+		}
+		try {
+			midRule = dict.getRule(mid.toLowerCase());
+			if (midRule == null) throw new Exception();
+		} catch (Exception e) {
+			System.err.println("Word '" + mid + "' not found in dictionary.");
+			System.exit(0);
+		}
+		try {
+			rightRule = dict.getRule(right.toLowerCase());
+			if (rightRule == null) throw new Exception();
+		} catch (Exception e) {
+			System.err.println("Word '" + right + "' not found in dictionary.");
+			System.exit(0);
+		}
+		try {
+			nextRule = dict.getRule(next.toLowerCase());
+			if (nextRule == null) throw new Exception();
+		} catch (Exception e) {
+			System.err.println("Word '" + next + "' not found in dictionary.");
+			System.exit(0);
+		}
+    	boolean midTrue = false;
+    	boolean rightTrue = false;
+    	boolean nextTrue = false;
+    	int rightId = 0;
+    	int midId = 0;
+    	int nextId = 0;
+    	for (Disjunct dl : leftRule.getDisjuncts()) {
+    		String wl = "";
+    		if (dl.getConnectors().size() > 1) {
+				for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
+    				String c = dl.getConnectors().get(ci);
+    				if (!c.contains("-")) {
+    					wl += c + " & ";
+    				}
+    			}
+				String c = dl.getConnectors().get(dl.getConnectors().size() - 1);
+				if (!c.contains("-")) {
+					wl += c;
+				} else {
+					if (wl.contains("&")) wl = wl.substring(0, wl.length() - 3);
+				}
+			} else {
+				wl = dl.getConnectors().get(0);
+			}
+			if (!wl.contains("&")) continue;
+    		for (Disjunct dr : rightRule.getDisjuncts()) {
+    			for (Disjunct dm : midRule.getDisjuncts()) {
+    				for (Disjunct dn : nextRule.getDisjuncts()) {
+	    				String[] parts = wl.split(" & ");
+	    				for (int idp = 0; idp < parts.length; idp++) {
+	    					String part = parts[idp];
+	    					String wr = "";
+	    	    			if (dr.getConnectors().size() > 1) {
+	    	    				for (int ci = 0; ci < dr.getConnectors().size() - 1; ci++) {
+	    		    				String c = dr.getConnectors().get(ci);
+	    		    				if (c.contains("-")) {
+	    		    					wr += c + " & ";
+	    		    				}
+	    		    			}
+	    	    				String c = dr.getConnectors().get(dr.getConnectors().size() - 1);
+	    	    				if (c.contains("-")) {
+	    	    					wr += c;
+	    	    				} else {
+	    	    					if (wr.contains("&")) wr = wr.substring(0, wr.length() - 3);
+	    	    				}
+	    	    			} else {
+	    	    				wr = dr.getConnectors().get(0);
+	    	    			}
+	    	    			String wm = "";
+	    	    			if (dm.getConnectors().size() > 1) {
+	    	    				for (int ci = 0; ci < dm.getConnectors().size() - 1; ci++) {
+	    		    				String c = dm.getConnectors().get(ci);
+	    		    				if (c.contains("-")) {
+	    		    					wm += c + " & ";
+	    		    				}
+	    		    			}
+	    	    				String c = dm.getConnectors().get(dm.getConnectors().size() - 1);
+	    	    				if (c.contains("-")) {
+	    	    					wm += c;
+	    	    				} else {
+	    	    					if (wm.contains("&")) wm = wm.substring(0, wm.length() - 3);
+	    	    				}
+	    	    			} else {
+	    	    				wm = dm.getConnectors().get(0);
+	    	    			}
+	    	    			String wn = "";
+	    	    			if (dn.getConnectors().size() > 1) {
+	    	    				for (int ci = 0; ci < dn.getConnectors().size() - 1; ci++) {
+	    		    				String c = dn.getConnectors().get(ci);
+	    		    				if (c.contains("-")) {
+	    		    					wn += c + " & ";
+	    		    				}
+	    		    			}
+	    	    				String c = dn.getConnectors().get(dn.getConnectors().size() - 1);
+	    	    				if (c.contains("-")) {
+	    	    					wn += c;
+	    	    				} else {
+	    	    					if (wn.contains("&")) wn = wn.substring(0, wn.length() - 3);
+	    	    				}
+	    	    			} else {
+	    	    				wn = dn.getConnectors().get(0);
+	    	    			}
+	    	    			String wru = wr.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+	    	    			String wmu = wm.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+	    	    			String wnu = wn.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+	    	    			if (wru.equals(part)) {
+	    	    				rightTrue = true;
+	    	    				rightId = idp;
+	    	    			}
+	    	    			if (wmu.equals(part)) {
+	    	    				midTrue = true;
+	    	    				midId = idp;
+	    	    			}
+	    	    			if (wnu.equals(part)) {
+	    	    				nextTrue = true;
+	    	    				nextId = idp;
+	    	    			} else {
+	    	    				ifc: if (wnu.contains("&")) {
+	    	    					String[] p = wnu.split(" & ");
+	    	    					for (String s : p) {
+	    	    						if (s.equals(part)) {
+	    		    	    				nextTrue = true;
+	    		    	    				nextId = idp;
+	    		    	    				break ifc;
+	    		    	    			}
+	    	    					}
+	    	    				}
+	    	    			}
+	    				}
+    				}
+    			}
+    		}
+    	}
+    	return rightTrue && midTrue && (midId < rightId) && (rightId < nextId);
+	}
 
 	private static boolean isValid(String[] input, Dictionary dict) {
+		boolean debug = false;
+		if (Arrays.equals(input, new String[] {"Dad", "wants", "Mom", "to", "be", "on", "the", "board", "of", "directors"})) debug = true;
+		if (debug) System.out.println(Arrays.toString(input));
 	    outer: for (int i = 0; i < input.length - 1; i++) {
 	    	String left = input[i];
 	    	String right = input[i+1];
@@ -496,6 +673,16 @@ public class Generator {
 	    			if (connectsLeft(input[i-3], input[i-2], right, dict)) continue outer;
 	    		} else {
 	    			if (connectsLeft(input[i-2], input[i-1], right, dict)) continue outer;
+	    		}
+	    	} else if (left.equals("wants") && i+2 < input.length) {
+	    		if (right.equals("to")) {
+	    			i += 2;
+	    			if (connectsLeft("wants", "to", input[i], dict)) continue outer;
+	    		} else if (input[i+2].equals("to")) {
+	    			if (i+3 < input.length) {
+	    				i += 3;
+	    				if (connectsFour(left, right, input[i-1], input[i], dict)) continue outer;
+	    			}
 	    		}
 	    	} else {
 		    	if (connects(left, right, dict)) continue outer;
@@ -548,6 +735,22 @@ public class Generator {
 				words.add(w);
 			}
 			return words;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static List<String> getList(String path) throws IOException {
+		try {
+			URL url = new Generator().getClass().getResource(path);
+			File f = new File(url.getPath());
+			if (!f.exists()) return null;
+			List<String> sentences = Files.readAllLines(f.toPath());
+			Iterator<String> it = sentences.iterator();
+			while (it.hasNext()) {
+				if (it.next().isEmpty()) it.remove();
+			}
+			return sentences;
 		} catch (Exception e) {
 			return null;
 		}
