@@ -103,9 +103,6 @@ public class Generator {
 		} else {
 			System.out.println("No command line parameters given.");
 		}
-		dict = Loader.grammarBuildLinks("dict_30C_2018-12-31_0006.4.0.dict", true);
-		String[] words = new String[] { "Mom", "sawed", "the", "wood", "with", "a", "saw" };
-		System.out.println(Arrays.toString(words) + ": " + generateSentence(words));
 	}
 
 	public static HashSet<String> generateSentence(String[] elements) {
@@ -769,12 +766,11 @@ public class Generator {
 	}
 
 	private static boolean isValid(String[] input) {
-		boolean debug = Arrays.equals(input, new String[] {"Mom", "sawed", "the", "wood", "with", "a", "saw"});
 		outer: for (int i = 0; i < input.length - 1; i++) {
 			String left = input[i];
 			String right = input[i + 1];
 			if ((dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("sawed").toString())
-					|| dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("writes").toString())
+					|| (dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("writes").toString()) && contains(input, "to"))
 					|| dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("saw").toString()))
 					&& (idx(input, "with") == i+2 || idx(input, "with") == i+3)) {
 				int idx = idx(input, "with");
