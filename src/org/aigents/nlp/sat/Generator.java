@@ -654,9 +654,6 @@ public class Generator {
 	}
 
 	private static boolean isValid(String[] input, Dictionary dict) {
-		boolean debug = false;
-		if (Arrays.equals(input, new String[] {"Dad", "wants", "Mom", "to", "be", "on", "the", "board", "of", "directors"})) debug = true;
-		if (debug) System.out.println(Arrays.toString(input));
 	    outer: for (int i = 0; i < input.length - 1; i++) {
 	    	String left = input[i];
 	    	String right = input[i+1];
