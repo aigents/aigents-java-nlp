@@ -331,11 +331,12 @@ public class Generator {
 			System.err.println("Word '" + right + "' not found in dictionary.");
 			System.exit(0);
 		}
-		boolean leftTrue = false;
-		boolean midTrue = false;
-		int leftId = 0;
-		int midId = 0;
-		for (Disjunct dr : rightRule.getDisjuncts()) {
+		boolean[] leftTrue = new boolean[leftRule.getDisjuncts().size()];
+		boolean[] midTrue = new boolean[leftRule.getDisjuncts().size()];
+		int[] leftId = new int[leftRule.getDisjuncts().size()];
+		int[] midId = new int[leftRule.getDisjuncts().size()];
+		for (int ri = 0; ri < rightRule.getDisjuncts().size(); ri++) {
+			Disjunct dr = rightRule.getDisjuncts().get(ri);
 			String wr = "";
 			if (dr.getConnectors().size() > 1) {
 				for (int ci = 0; ci < dr.getConnectors().size() - 1; ci++) {
@@ -399,19 +400,22 @@ public class Generator {
 						}
 						String wlu = wl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
 						String wmu = wm.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-						if (wlu.equals(part) && !leftTrue) {
-							leftTrue = true;
-							leftId = idp;
+						if (wlu.equals(part) && !leftTrue[ri]) {
+							leftTrue[ri] = true;
+							leftId[ri] = idp;
 						}
-						if (wmu.equals(part) && !midTrue) {
-							midTrue = true;
-							midId = idp;
+						if (wmu.equals(part) && !midTrue[ri]) {
+							midTrue[ri] = true;
+							midId[ri] = idp;
 						}
 					}
 				}
 			}
 		}
-		return leftTrue && midTrue && midId < leftId;
+		for (int i = 0; i < leftTrue.length; i++) {
+			if (leftTrue[i] && midTrue[i] && midId[i]<leftId[i]) return true;
+		}
+		return false;
 	}
 
 	private static boolean connectsLeft(String left, String mid, String right) {
@@ -440,11 +444,12 @@ public class Generator {
 			System.err.println("Word '" + right + "' not found in dictionary.");
 			System.exit(0);
 		}
-		boolean midTrue = false;
-		boolean rightTrue = false;
-		int rightId = 0;
-		int midId = 0;
-		for (Disjunct dl : leftRule.getDisjuncts()) {
+		boolean[] midTrue = new boolean[leftRule.getDisjuncts().size()];
+		boolean[] rightTrue = new boolean[leftRule.getDisjuncts().size()];
+		int[] rightId = new int[leftRule.getDisjuncts().size()];
+		int[] midId = new int[leftRule.getDisjuncts().size()];
+		for (int li = 0; li < leftRule.getDisjuncts().size(); li++) {
+			Disjunct dl = leftRule.getDisjuncts().get(li);
 			String wl = "";
 			if (dl.getConnectors().size() > 1) {
 				for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
@@ -465,6 +470,7 @@ public class Generator {
 			}
 			if (!wl.contains("&"))
 				continue;
+			String[] p = wl.split(" & ");
 			for (Disjunct dr : rightRule.getDisjuncts()) {
 				for (Disjunct dm : midRule.getDisjuncts()) {
 					String[] parts = wl.split(" & ");
@@ -508,19 +514,22 @@ public class Generator {
 						}
 						String wru = wr.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
 						String wmu = wm.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-						if (wru.equals(part) && !rightTrue) {
-							rightTrue = true;
-							rightId = idp;
+						if (wru.equals(part) && !rightTrue[li]) {
+							rightTrue[li] = true;
+							rightId[li] = idp;
 						}
-						if (wmu.equals(part) && !midTrue) {
-							midTrue = true;
-							midId = idp;
+						if (wmu.equals(part) && !midTrue[li]) {
+							midTrue[li] = true;
+							midId[li] = idp;
 						}
 					}
 				}
 			}
 		}
-		return rightTrue && midTrue && midId < rightId;
+		for (int i = 0; i < rightTrue.length; i++) {
+			if (rightTrue[i] && midTrue[i] && midId[i]<rightId[i]) return true;
+		}
+		return false;
 	}
 
 	private static boolean connectsFour(String left, String mid, String right, String next) {
@@ -677,7 +686,7 @@ public class Generator {
 		}
 		return rightTrue && midTrue && nextTrue && (midId < rightId) && (rightId < nextId);
 	}
-
+	
 	private static boolean connectsAll(String left, String mid, String right, String next) {
 		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule(), nextRule = new Rule();
 		try {
