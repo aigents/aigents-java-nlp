@@ -141,7 +141,7 @@ public class Generator {
 				i++;
 			}
 			if (now && !not) {
-				if (isValid(input)) {
+				if (check(input) && isValid(input)) {
 					String str = makeSentence(input);
 					int nowId = 0;
 					String[] parts = str.split(" ");
@@ -155,14 +155,14 @@ public class Generator {
 				}
 			}
 			if (not && !now) {
-				if (isValid(input)) {
+				if (check(input) && isValid(input)) {
 					String str = makeSentence(input);
 					str = str.replace(" a", " not a");
 					ret.add(str);
 				}
 			}
 			if (not && now) {
-				if (isValid(input)) {
+				if (check(input) && isValid(input)) {
 					String str = makeSentence(input);
 					int nowId = 0;
 					String[] parts = str.split(" ");
@@ -177,7 +177,7 @@ public class Generator {
 				}
 			}
 		} else {
-			if (isValid(elements)) {
+			if (check(elements) && isValid(elements)) {
 				ret.add(makeSentence(elements));
 			}
 		}
@@ -200,7 +200,7 @@ public class Generator {
 						id++;
 					}
 					if (now && !not) {
-						if (isValid(input)) {
+						if (check(input) && isValid(input)) {
 							String str = makeSentence(input);
 							int nowId = 0;
 							String[] parts = str.split(" ");
@@ -214,14 +214,14 @@ public class Generator {
 						}
 					}
 					if (not && !now) {
-						if (isValid(input)) {
+						if (check(input) && isValid(input)) {
 							String str = makeSentence(input);
 							str = str.replace(" a", " not a");
 							ret.add(str);
 						}
 					}
 					if (not && now) {
-						if (isValid(input)) {
+						if (check(input) && isValid(input)) {
 							String str = makeSentence(input);
 							int nowId = 0;
 							String[] parts = str.split(" ");
@@ -236,7 +236,7 @@ public class Generator {
 						}
 					}
 				} else {
-					if (isValid(elements)) {
+					if (check(elements) && isValid(elements)) {
 						ret.add(makeSentence(elements));
 					}
 				}
@@ -248,6 +248,26 @@ public class Generator {
 			}
 		}
 		return ret;
+	}
+	
+	private static boolean check(String[] input) {
+		String first = input[0].toLowerCase();
+		String last = input[input.length - 1].toLowerCase();
+		boolean firstTrue = false;
+		boolean lastTrue = false;
+		for (Disjunct df : dict.getRule(first).getDisjuncts()) {
+			if (!df.toString().contains("-")) {
+				firstTrue = true;
+				break;
+			}
+		}
+		for (Disjunct dl : dict.getRule(last).getDisjuncts()) {
+			if (!dl.toString().contains("+")) {
+				lastTrue = true;
+				break;
+			}
+		}
+		return firstTrue && lastTrue;
 	}
 
 	private static boolean connects(String left, String right) {
@@ -858,7 +878,7 @@ public class Generator {
 			String right = input[i + 1];
 			if ((dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("sawed").toString())
 					|| (dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("writes").toString()) && contains(input, "to"))
-					|| dict.getRule(left.toLowerCase()).toString().equals(dict.getRule("saw").toString()))
+					|| left.equals("saw"))
 					&& (idx(input, "with") == i+2 || idx(input, "with") == i+3)) {
 				int idx = idx(input, "with");
 				if (idx == i + 2) {
