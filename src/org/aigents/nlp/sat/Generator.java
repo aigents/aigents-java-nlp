@@ -45,7 +45,10 @@ public class Generator {
 
 	public static void main(String[] args) throws IOException {
 		if (args.length == 2) {
-			int correctCases = 0;
+			int single = 0;
+			int multOne = 0;
+			int multNo = 0;
+			int no = 0;
 			try {
 				dict = Loader.grammarBuildLinks(args[0], true);
 				List<String> list = getList(args[1]);
@@ -61,9 +64,12 @@ public class Generator {
 					System.out.println(Arrays.toString(w) + ": " + sentence);
 					String s = list.get(idx);
 					if (sentence.size() > 1) {
+						boolean one = false;
 						for (String sen2 : sentence) {
-							if (sen2.equals(s))
+							if (sen2.equals(s)) {
+								one = true;
 								continue;
+							}
 							String sen = sen2.substring(0, sen2.length() - 1);
 							String[] senParts = sen.split(" ");
 							String[] sParts = s.substring(0, s.length() - 1).split(" ");
@@ -77,15 +83,19 @@ public class Generator {
 							System.out.println("      While the sentence \"" + sen2
 									+ "\" is grammatically valid, it is contextually wrong.");
 						}
+						if (!one) multNo++;
+						else multOne++;
+					} else if (sentence.size() == 1) {
+						single++;
 					} else {
-						for (String sen : sentence) {
-							if (sen.equals(s))
-								correctCases++;
-						}
+						no++;
 					}
 				}
-				System.out.println("Correct cases: " + correctCases + "/" + words.size());
-				System.out.println("Accuracy: " + ((double) correctCases) / words.size());
+				System.out.println("Single correct: " + single + "/" + words.size());
+				System.out.println("Multiple with one correct: " + multOne + "/" + words.size());
+				System.out.println("Multiple with none correct: " + multNo + "/" + words.size());
+				System.out.println("No cases: " + no + "/" + words.size());
+				System.out.println("Accuracy: " + ((double) single) / words.size());
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
