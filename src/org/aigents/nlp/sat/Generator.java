@@ -910,8 +910,9 @@ public class Generator {
 				} else if (input[i + 3].equals("to")) {
 					if (i + 4 < input.length) {
 						i += 4;
-						if (connectsFour(left, right, input[i - 1], input[i]))
+						if (connectsFour(left, input[i-2], input[i - 1], input[i])) {
 							continue outer;
+						}
 					}
 				}
 			} else {
