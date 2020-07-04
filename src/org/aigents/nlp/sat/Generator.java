@@ -304,6 +304,75 @@ public class Generator {
 		}
 		return false;
 	}
+	
+	private static boolean connectsMin(String left, String right) {
+		Rule leftRule = new Rule(), rightRule = new Rule();
+		try {
+			leftRule = dict.getRule(left.toLowerCase());
+			if (leftRule == null)
+				throw new Exception();
+		} catch (Exception e) {
+			System.err.println("Word '" + left + "' not found in dictionary.");
+			System.exit(0);
+		}
+		try {
+			rightRule = dict.getRule(right.toLowerCase());
+			if (rightRule == null)
+				throw new Exception();
+		} catch (Exception e) {
+			System.err.println("Word '" + right + "' not found in dictionary.");
+			System.exit(0);
+		}
+		for (Disjunct dl : leftRule.getDisjuncts()) {
+			for (Disjunct dr : rightRule.getDisjuncts()) {
+				String wl = "";
+				String wr = "";
+				if (dl.getConnectors().size() > 1) {
+					for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
+						String c = dl.getConnectors().get(ci);
+						if (!c.contains("-")) {
+							wl += c + " & ";
+						}
+					}
+					String c = dl.getConnectors().get(dl.getConnectors().size() - 1);
+					if (!c.contains("-")) {
+						wl += c;
+					} else {
+						if (wl.contains("&"))
+							wl = wl.substring(0, wl.length() - 3);
+					}
+				} else {
+					wl = dl.getConnectors().get(0);
+				}
+				if (dr.getConnectors().size() > 1) {
+					for (int ci = 0; ci < dr.getConnectors().size() - 1; ci++) {
+						String c = dr.getConnectors().get(ci);
+						if (c.contains("-")) {
+							wr += c + " & ";
+						}
+					}
+					String c = dr.getConnectors().get(dr.getConnectors().size() - 1);
+					if (c.contains("-")) {
+						wr += c;
+					} else {
+						if (wr.contains("&"))
+							wr = wr.substring(0, wr.length() - 3);
+					}
+				} else {
+					wr = dr.getConnectors().get(0);
+				}
+				for (String lp : wl.split(" & ")) {
+					for (String rp : wr.split(" & ")) {
+						String wlu = lp.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
+						if (wlu.equals(rp)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	private static boolean connects(String left, String mid, String right) {
 		Rule leftRule = new Rule(), midRule = new Rule(), rightRule = new Rule();
@@ -331,10 +400,10 @@ public class Generator {
 			System.err.println("Word '" + right + "' not found in dictionary.");
 			System.exit(0);
 		}
-		boolean[] leftTrue = new boolean[leftRule.getDisjuncts().size()];
-		boolean[] midTrue = new boolean[leftRule.getDisjuncts().size()];
-		int[] leftId = new int[leftRule.getDisjuncts().size()];
-		int[] midId = new int[leftRule.getDisjuncts().size()];
+		boolean[] leftTrue = new boolean[rightRule.getDisjuncts().size()];
+		boolean[] midTrue = new boolean[rightRule.getDisjuncts().size()];
+		int[] leftId = new int[rightRule.getDisjuncts().size()];
+		int[] midId = new int[rightRule.getDisjuncts().size()];
 		for (int ri = 0; ri < rightRule.getDisjuncts().size(); ri++) {
 			Disjunct dr = rightRule.getDisjuncts().get(ri);
 			String wr = "";
@@ -470,7 +539,6 @@ public class Generator {
 			}
 			if (!wl.contains("&"))
 				continue;
-			String[] p = wl.split(" & ");
 			for (Disjunct dr : rightRule.getDisjuncts()) {
 				for (Disjunct dm : midRule.getDisjuncts()) {
 					String[] parts = wl.split(" & ");
@@ -814,6 +882,9 @@ public class Generator {
 				} else {
 					if (connectsLeft(input[i - 2], input[i - 1], right))
 						continue outer;
+					else {
+						if (i >= 4 && connectsMin(input[i-4], right)) continue outer;
+					}
 				}
 			} else if (left.equals("wants") && i + 2 < input.length) {
 				if (right.equals("to")) {
