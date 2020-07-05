@@ -31,7 +31,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aigents.nlp.sat.Generator;
+import org.aigents.nlp.gen.Generator;
 
 public class Loader {
 	public static void main(String[] args) throws IOException {
