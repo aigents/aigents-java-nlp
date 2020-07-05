@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.aigents.nlp.sat;
+package org.aigents.nlp.gen;
 
 import java.io.File;
 import java.io.IOException;
