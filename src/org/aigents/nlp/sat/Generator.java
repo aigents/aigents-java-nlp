@@ -94,7 +94,7 @@ public class Generator {
 				System.out.println("Single correct: " + single + "/" + words.size());
 				System.out.println("Multiple with one correct: " + multOne + "/" + words.size());
 				System.out.println("Multiple with none correct: " + multNo + "/" + words.size());
-				System.out.println("No cases: " + no + "/" + words.size());
+				System.out.println("None correct: " + no + "/" + words.size());
 				System.out.println("Accuracy: " + ((double) single) / words.size());
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
@@ -969,6 +969,8 @@ public class Generator {
 			ret += arr[i] + " ";
 		}
 		ret += arr[arr.length - 1] + ".";
+		ret = ret.toLowerCase();
+		ret = ret.substring(0,1).toUpperCase() + ret.substring(1);
 		return ret;
 	}
 
