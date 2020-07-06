@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.aigents.nlp.gen.Generator;
@@ -55,6 +57,148 @@ public class Loader {
 		} else {
 			System.out.println("No command line parameters given.");
 		}
+	}
+	
+	public static Dictionary[] buildLGDict(String path) throws IOException {
+		URL url = new Loader().getClass().getResource(path);
+		File f = new File(url.getPath());
+		if (!f.exists()) return null;
+		List<String> list = Files.readAllLines(f.toPath());
+		Iterator<String> it = list.iterator();
+		while (it.hasNext()) {
+			String str = it.next();
+			if ((str.contains("%") && !str.contains("\"%\"")) || str.contains("<dictionary-version-number>") 
+					|| str.contains("<dictionary-locale>")) {
+				it.remove();
+			}
+		}
+		String[] lines = new String[list.size()];
+		for (int i = 0; i < list.size(); i++) {
+			lines[i] = list.get(i).trim();
+		}
+		return makeLGDict(lines);
+	}
+	
+	private static Dictionary[] makeLGDict(String[] lines) throws IOException {
+		HashMap<String, String> macros = new HashMap<>();
+		Dictionary dict = new Dictionary();
+		Dictionary hyphenated = new Dictionary();
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			if (line.length() == 0) continue;
+			if (line.charAt(0) == '<') { // process macros
+				String str = "";
+				while (!lines[i].contains(";")) {
+					str += lines[i] + " ";
+					i++;
+				}
+				str += " " + lines[i].substring(0, lines[i].length()-1);
+				if (str.trim().length() == 0) continue;
+				str = str.replaceAll("\\d","");
+				String[] parts = str.split(":");
+				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
+				String rule = parts[1];
+				while (rule.contains("<")) {
+					String macro = rule.substring(rule.indexOf("<"), rule.indexOf(">")+1);
+					rule = rule.replace(macro, macros.get(macro));
+				}
+				for (String m : parts[0].split(" ")) {
+					macros.put(m, rule);
+				}
+			} else if (line.contains("/words/")) { // process files
+				String str = "";
+				while (!lines[i].contains(";")) {
+					str += lines[i] + " ";
+					i++;
+				}
+				str += " " + lines[i].substring(0, lines[i].length()-1);
+				String[] parts = str.split(":");
+				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
+				for (String path : parts[0].split(" ")) {
+					URL url = new Loader().getClass().getResource(path.substring(4));
+					File f = new File(url.getPath());
+					if (!f.exists()) return null;
+					List<String> list = Files.readAllLines(f.toPath());
+					for (String l : list) {
+						for (String word : l.split(" ")) {
+							addRule(dict, hyphenated, macros, word, parts[1]);
+						}
+					}
+				}
+			} else { // process words or lists of words
+				String str = "";
+				while (!lines[i].contains(";")) {
+					str += lines[i] + " ";
+					i++;
+				}
+				str += " " + lines[i].substring(0, lines[i].length()-1);
+				str = str.replaceAll("\\d","");
+				if (str.contains("\"%\"")) str.replaceAll("\"%\"", "%");
+				String[] parts = str.split(":");
+				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
+				for (String word : parts[0].split(" ")) {
+					addRule(dict, hyphenated, macros, word, parts[1]);
+				}
+			}
+		}
+		return new Dictionary[] {dict, hyphenated};
+	}
+	
+	private static void addRule(Dictionary dict, Dictionary hyphenated, HashMap<String, String> macros, String word, String rule) {
+		Word w;
+		if (word.contains(".")) {
+			String[] split = word.split("\\.");
+			if (split.length == 1) w = new Word(split[0]);
+			else w = new Word(split[0], split[1]);
+		} else w = new Word(word);
+		while (rule.length() > 0) {
+			if (rule.charAt(0) == '<') {
+				String macro = rule.substring(0, rule.indexOf(">") + 1);
+				rule = (rule.indexOf(" or") == -1)? "" : rule.substring(rule.indexOf(" or") + 4);
+				w.addRule(macros.get(macro));
+			} else if (rule.charAt(0) == '(') {
+				int numC = 1;
+				int num = 0;
+				int idx = 0;
+				for (int i = 1; i < rule.length(); i++) {
+					if (rule.charAt(i) == '(') numC++;
+					else if (rule.charAt(i) == ')') num++;
+					if (numC == num) {
+						idx = i; break;
+					}
+				}
+				String r = rule.substring(0, idx+1);
+				while (r.contains("<")) {
+					String macro = r.substring(r.indexOf("<"), r.indexOf(">")+1);
+					r = r.replace(macro, macros.get(macro));
+				}
+				w.addRule(r);
+				rule = idx + 5 >= rule.length()? "" : rule.substring(idx + 5);
+			} else if (rule.charAt(0) == '{') {
+				int numC = 1;
+				int num = 0;
+				int idx = 0;
+				for (int i = 1; i < rule.length(); i++) {
+					if (rule.charAt(i) == '{') numC++;
+					else if (rule.charAt(i) == '}') num++;
+					if (numC == num) {
+						idx = i; break;
+					}
+				}
+				String r = rule.substring(0, idx+1);
+				while (r.contains("<")) {
+					String macro = r.substring(r.indexOf("<"), r.indexOf(">")+1);
+					r = r.replace(macro, macros.get(macro));
+				}
+				w.addRule(r);
+				rule = idx + 5 >= rule.length()? "" : rule.substring(idx + 5);
+			} else {
+				w.addRule(rule.substring(0, (rule.indexOf(" or") == -1)? rule.length() : rule.indexOf(" or")));
+				rule = (rule.indexOf(" or") == -1)? "" : rule.substring(rule.indexOf(" or") + 4);
+			}		
+		}
+		if (word.contains("_")) hyphenated.addWord(w);
+		else dict.addWord(w);
 	}
 	
 	public static Dictionary grammarBuildLinks(String path, boolean isGenerator) throws IOException {
@@ -96,7 +240,7 @@ public class Loader {
 				line = line.substring(0, semicolon);
 				String[] rules = line.split(" or ");
 				for (int i = 0; i < rules.length; i++){
-					rules[i] = rules[i].substring(0, rules[i].length() - 1).substring(1);
+					rules[i] = rules[i].substring(1, rules[i].length() - 1);
 					links.add(new String[] {code, rules[i], "cd"});
 				}
 				for (int i = 0; i < words.length; i++) {
