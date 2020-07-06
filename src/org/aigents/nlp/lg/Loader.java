@@ -38,24 +38,37 @@ import org.aigents.nlp.gen.Generator;
 public class Loader {
 	public static void main(String[] args) throws IOException {
 		if (args.length >= 2) {
-			Dictionary dict = grammarBuildLinks(args[0], false);
-			for (Word w : dict.getWords()) {
-				if (w.getWord().equals(args[1])) {
-					System.out.print(w.getWord() + ": ");
-					Rule rule = w.getRule();
-					assert rule != null && rule.getWords().size() > 0: " No valid rules";
-					System.out.println(rule);
-					ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
-					assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
-					System.out.print("Disjuncts: ");
-					for (int i = 0; i < disjuncts.size() - 1; i++) {
-						System.out.print(disjuncts.get(i) + "; ");
-					}
-					System.out.println(disjuncts.get(disjuncts.size() - 1));
-				}
+			if (args[0].equals("4.0.dict")) {
+				Dictionary[] dicts = buildLGDict(args[0]);
+				Dictionary dict = dicts[0];
+				Dictionary hyphenated = dicts[1];
+				if (args[1].contains("_")) {
+					find(hyphenated, args[1]);
+				} else find(dict, args[1]);
+			} else {
+				Dictionary dict = grammarBuildLinks(args[0], false);
+				find(dict, args[1]);
 			}
 		} else {
 			System.out.println("No command line parameters given.");
+		}
+	}
+	
+	private static void find(Dictionary dict, String word) {
+		for (Word w : dict.getWords()) {
+			if (w.getWord().equals(word)) {
+				System.out.print(w.getWord() + ": ");
+				Rule rule = w.getRule();
+				assert rule != null && rule.getWords().size() > 0: " No valid rules";
+				System.out.println(rule);
+				ArrayList<Disjunct> disjuncts = rule.getDisjuncts();
+				assert disjuncts != null && disjuncts.size() > 0 : "No valid disjunct";
+				System.out.print("Disjuncts: ");
+				for (int i = 0; i < disjuncts.size() - 1; i++) {
+					System.out.print(disjuncts.get(i) + "; ");
+				}
+				System.out.println(disjuncts.get(disjuncts.size() - 1));
+			}
 		}
 	}
 	
