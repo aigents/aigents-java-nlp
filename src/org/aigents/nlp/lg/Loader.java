@@ -108,6 +108,7 @@ public class Loader {
 				str += " " + lines[i].substring(0, lines[i].length()-1);
 				if (str.trim().length() == 0) continue;
 				str = str.replaceAll("\\d","");
+				str = str.replaceAll("\\.", "");
 				String[] parts = str.split(":");
 				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
 				String rule = parts[1];
@@ -146,6 +147,7 @@ public class Loader {
 				}
 				str += " " + lines[i].substring(0, lines[i].length()-1);
 				str = str.replaceAll("\\d","");
+				str = str.replaceAll("\\.", "");
 				if (str.contains("\"%\"")) str.replaceAll("\"%\"", "%");
 				String[] parts = str.split(":");
 				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
