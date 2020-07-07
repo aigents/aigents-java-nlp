@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -74,9 +75,9 @@ public class Loader {
 	public static Dictionary[] buildLGDict(String path) throws IOException {
 		Path p;
 		if (System.getProperty("user.dir").endsWith("src")) {
-			p = Paths.get(Paths.get("../data/en/4.0.dict").toAbsolutePath().toString());
+			p = Paths.get(Paths.get("../data/" + path).toAbsolutePath().toString());
 		} else {
-			p = Paths.get(Paths.get("data/en/4.0.dict").toAbsolutePath().toString());
+			p = Paths.get(Paths.get("data/" + path).toAbsolutePath().toString());
 		}
 		File f = p.toFile();
 		if (!f.exists()) return null;
@@ -85,7 +86,7 @@ public class Loader {
 		while (it.hasNext()) {
 			String str = it.next();
 			if ((str.contains("%") && !str.contains("\"%\"")) || str.contains("<dictionary-version-number>") 
-					|| str.contains("<dictionary-locale>")) {
+					|| str.contains("<dictionary-locale>") || str.contains("#include")) {
 				it.remove();
 			}
 		}
@@ -156,9 +157,9 @@ public class Loader {
 				}
 				str += " " + lines[i].substring(0, lines[i].length()-1);
 				str = str.replaceAll("\\d","");
-				str = str.replaceAll("\\.", "");
 				if (str.contains("\"%\"")) str.replaceAll("\"%\"", "%");
 				String[] parts = str.split(":");
+				parts[1] = parts[1].replaceAll("\\.", "");
 				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
 				for (String word : parts[0].split(" ")) {
 					addRule(dict, hyphenated, macros, word, parts[1]);
@@ -217,7 +218,12 @@ public class Loader {
 				w.addRule(r);
 				rule = idx + 5 >= rule.length()? "" : rule.substring(idx + 5);
 			} else {
-				w.addRule(rule.substring(0, (rule.indexOf(" or") == -1)? rule.length() : rule.indexOf(" or")));
+				String toAdd = rule.substring(0, (rule.indexOf(" or") == -1)? rule.length() : rule.indexOf(" or"));
+				while (toAdd.contains("<")) {
+					String macro = toAdd.substring(toAdd.indexOf("<"), toAdd.indexOf(">")+1);
+					toAdd = toAdd.replace(macro, macros.get(macro));
+				}
+				w.addRule(toAdd);
 				rule = (rule.indexOf(" or") == -1)? "" : rule.substring(rule.indexOf(" or") + 4);
 			}		
 		}
