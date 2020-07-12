@@ -118,6 +118,7 @@ public class Loader {
 					String macro = rule.substring(rule.indexOf("<"), rule.indexOf(">")+1);
 					rule = rule.replace(macro, macros.get(macro));
 				}
+				rule = rule.replaceAll("\\d", "");
 				for (String m : parts[0].split(" ")) {
 					macros.put(m, rule);
 				}
@@ -224,6 +225,7 @@ public class Loader {
 					String macro = r.substring(r.indexOf("<"), r.indexOf(">")+1);
 					r = r.replace(macro, macros.get(macro));
 				}
+				r = r.replaceAll("\\d", "");
 				w.addRule(r);
 				rule = idx + 5 >= rule.length()? "" : rule.substring(idx + 5);
 			} else if (rule.charAt(0) == '{') {
@@ -242,6 +244,7 @@ public class Loader {
 					String macro = r.substring(r.indexOf("<"), r.indexOf(">")+1);
 					r = r.replace(macro, macros.get(macro));
 				}
+				r = r.replaceAll("\\d", "");
 				w.addRule(r);
 				rule = idx + 5 >= rule.length()? "" : rule.substring(idx + 5);
 			} else {
@@ -250,6 +253,7 @@ public class Loader {
 					String macro = toAdd.substring(toAdd.indexOf("<"), toAdd.indexOf(">")+1);
 					toAdd = toAdd.replace(macro, macros.get(macro));
 				}
+				toAdd = toAdd.replaceAll("\\d", "");
 				w.addRule(toAdd);
 				rule = (rule.indexOf(" or") == -1)? "" : rule.substring(rule.indexOf(" or") + 4);
 			}		
