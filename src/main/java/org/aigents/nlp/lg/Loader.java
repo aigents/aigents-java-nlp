@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -112,10 +111,8 @@ public class Loader {
 				}
 				str += " " + lines[i].substring(0, lines[i].length()-1);
 				if (str.trim().length() == 0) continue;
-				str = str.replaceAll("\\d","");
-				str = str.replaceAll("\\.", "");
-				String[] parts = str.split(":");
-				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
+				str = processString(str);
+				String[] parts = getParts(str);
 				String rule = parts[1];
 				while (rule.contains("<")) {
 					String macro = rule.substring(rule.indexOf("<"), rule.indexOf(">")+1);
@@ -131,8 +128,7 @@ public class Loader {
 					i++;
 				}
 				str += " " + lines[i].substring(0, lines[i].length()-1);
-				String[] parts = str.split(":");
-				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
+				String[] parts = getParts(str);
 				for (String path : parts[0].split(" ")) {
 					Path p;
 					if (System.getProperty("user.dir").endsWith("src")) {
@@ -156,10 +152,9 @@ public class Loader {
 					i++;
 				}
 				str += " " + lines[i].substring(0, lines[i].length()-1);
-				str = str.replaceAll("\\d","");
 				if (str.contains("\"%\"")) str.replaceAll("\"%\"", "%");
-				String[] parts = str.split(":");
-				parts[1] = parts[1].replaceAll("\\.", "");
+				String[] parts = getParts(str);
+				parts[1] = processString(parts[1]);
 				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
 				for (String word : parts[0].split(" ")) {
 					addRule(dict, hyphenated, macros, word, parts[1]);
@@ -167,6 +162,38 @@ public class Loader {
 			}
 		}
 		return new Dictionary[] {dict, hyphenated};
+	}
+	
+	private static String[] getParts(String str) {
+		String[] parts;
+		if (str.split(":").length > 2) {
+			int idx = str.lastIndexOf(":");
+			parts = new String[2];
+			parts[0] = str.substring(0, idx);
+			parts[1] = str.substring(idx+1);
+		} else {
+			parts = str.split(":");
+		}
+		for (int k = 0; k < 2; k++) parts[k] = parts[k].trim();
+		return parts;
+	}
+	
+	private static String processString(String str) {
+		while (str.contains(".")) {
+			int id = str.indexOf(".");
+			int u = id+1;
+			for (u=id+1; u < str.length(); u++) {
+				boolean numeric = true;
+		        try {
+		            Double.parseDouble(str.substring(u, u+1));
+		        } catch (NumberFormatException e) {
+		            numeric = false;
+		        }
+				if (!numeric) break;
+			}
+			str = str.substring(0,id) + str.substring(u);
+		}
+		return str;
 	}
 	
 	private static void addRule(Dictionary dict, Dictionary hyphenated, HashMap<String, String> macros, String word, String rule) {
