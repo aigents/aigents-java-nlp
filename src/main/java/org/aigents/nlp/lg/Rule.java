@@ -40,7 +40,6 @@ public class Rule {
 		this.disjuncts = disjuncts;
 	}
 	
-	// TODO: Fix
 	public void addWord(String word) {
 		words.add(word);
 		Disjunct d = new Disjunct();
