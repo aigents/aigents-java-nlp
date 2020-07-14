@@ -10,18 +10,22 @@ To use the sentences provided in the file `poc_english.txt`, run
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
     javac main/java/org/aigents/nlp/gen/*.java
-    java main.java.org.aigents.nlp.gen.Generator dict_30C_2018-12-31_0006.4.0.dict poc_english.txt
+    java main.java.org.aigents.nlp.gen.Generator en/4.0.dict poc_english.txt
     
-The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified in the second argument (`poc_english.txt` in the line above).
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified in the second argument (`poc_english.txt` in the line above).
 
-To use custom words (must be part of the small grammar corpus `dict_30C_2018-12-31_0006.4.0.dict` for now, larger dictionaries will be added in future iterations), run
+To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
     javac main/java/org/aigents/nlp/gen/*.java
-    java main.java.org.aigents.nlp.gen.Generator dict_30C_2018-12-31_0006.4.0.dict food Cake a is now
+    java main.java.org.aigents.nlp.gen.Generator en/4.0.dict food Cake a is now
     
-The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`dict_30C_2018-12-31_0006.4.0.dict` in the line above) and will then generate a grammatically valid sentence from the words given in the subsequent arguments (`food`, `Cake`, `a`, `is`, and `now` in the line above).
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then generate a grammatically valid sentence from the words given in the subsequent arguments (`food`, `Cake`, `a`, `is`, and `now` in the line above).
+
+To test `SmallGrammarGen.java`, follow the same steps as with `Generator.java`, but change the last line to
+
+    java main.java.org.aigents.nlp.gen.SmallGrammarGen dict_30C_2018-12-31_0006.4.0.dict <individual words or poc_english.txt>
 
 To test `Loader.java`, run 
 
