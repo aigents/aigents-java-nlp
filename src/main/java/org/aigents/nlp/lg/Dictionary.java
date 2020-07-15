@@ -24,6 +24,7 @@
 
 package main.java.org.aigents.nlp.lg;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Dictionary {
@@ -47,7 +48,17 @@ public class Dictionary {
 		this.words = words;
 	}
 	
-	public Rule getRule(String word) {
+	public ArrayList<Rule> getRule(String word) {
+		ArrayList<Rule> rules = new ArrayList<>();
+		for (Word w : words) {
+			if (w.getWord().equals(word)) {
+				rules.add(w.getRule());
+			}
+		}
+		return rules;
+	}
+	
+	public Rule getRule(String word, boolean SmallGrammarGen) {
 		for (Word w : words) {
 			if (w.getWord().equals(word)) {
 				return w.getRule();
