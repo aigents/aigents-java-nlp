@@ -67,6 +67,15 @@ public class Dictionary {
 		return null;
 	}
 	
+	public String getSubscript(String word) {
+		for (Word w : words) {
+			if (w.getWord().equals(word)) {
+				return w.getSubscript();
+			}
+		}
+		return null;
+	}
+	
 	public String getVersionNumber() {	return versionNumber;	}
 	
 	public String getLocale() {	return locale;	}
