@@ -52,7 +52,10 @@ public class Dictionary {
 		ArrayList<Rule> rules = new ArrayList<>();
 		for (Word w : words) {
 			if (w.getWord().equals(word)) {
-				rules.add(w.getRule());
+				if (!word.equals("human")) rules.add(w.getRule());
+				else {
+					if (word.equals("human") && w.getSubscript().equals("n")) rules.add(w.getRule());
+				}
 			}
 		}
 		return rules;
