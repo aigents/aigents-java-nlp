@@ -28,60 +28,62 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Dictionary {
-	private HashSet<Word> words;
-	private static final String versionNumber = "V5v8v0+";
-	private static final String locale = "EN4us+";
-	
-	public Dictionary() {
-		words = new HashSet<>();
-	}
-	
-	public Dictionary(HashSet<Word> words) {
-		this.words = words;
-	}
-	
-	public void addWord(Word word) {
-		words.add(word);
-	}
-	
-	public void updateWords(HashSet<Word> words) {
-		this.words = words;
-	}
-	
-	public ArrayList<Rule> getRule(String word) {
-		ArrayList<Rule> rules = new ArrayList<>();
-		for (Word w : words) {
-			if (w.getWord().equals(word)) {
-				if (!word.equals("human")) rules.add(w.getRule());
-				else {
-					if (word.equals("human") && w.getSubscript().equals("n")) rules.add(w.getRule());
-				}
-			}
-		}
-		return rules;
-	}
-	
-	public Rule getRule(String word, boolean SmallGrammarGen) {
-		for (Word w : words) {
-			if (w.getWord().equals(word)) {
-				return w.getRule();
-			}
-		}
-		return null;
-	}
-	
-	public String getSubscript(String word) {
-		for (Word w : words) {
-			if (w.getWord().equals(word)) {
-				return w.getSubscript();
-			}
-		}
-		return null;
-	}
-	
-	public String getVersionNumber() {	return versionNumber;	}
-	
-	public String getLocale() {	return locale;	}
-	
-	public HashSet<Word> getWords() {	return words;	}
+  private HashSet<Word> words;
+  private static final String versionNumber = "V5v8v0+";
+  private static final String locale = "EN4us+";
+  
+  public Dictionary() {
+    words = new HashSet<>();
+  }
+  
+  public Dictionary(HashSet<Word> words) {
+    this.words = words;
+  }
+  
+  public void addWord(Word word) {
+    words.add(word);
+  }
+  
+  public void updateWords(HashSet<Word> words) {
+    this.words = words;
+  }
+  
+  public ArrayList<Rule> getRule(String word) {
+    ArrayList<Rule> rules = new ArrayList<>();
+    for (Word w : words) {
+      if (w.getWord().equals(word)) {
+        if (!word.equals("human") && !word.equals("cake")) rules.add(w.getRule());
+        else {
+          if (word.equals("human") && w.getSubscript().equals("n")) rules.add(w.getRule());
+          if (word.equals("cake") && w.getSubscript().equals("n-u")) rules.add(w.getRule());
+        }
+      }
+    }
+    return rules;
+  }
+  
+  public Rule getRule(String word, boolean SmallGrammarGen) {
+    for (Word w : words) {
+      if (w.getWord().equals(word)) {
+        return w.getRule();
+      }
+    }
+    return null;
+  }
+  
+  public ArrayList<String> getSubscript(String word) {
+    ArrayList<String> subs = new ArrayList<>();
+    for (Word w : words) {
+      if (w.getWord().equals(word) && !w.getSubscript().isEmpty()) {
+        subs.add(w.getSubscript());
+      }
+    }
+    return subs;
+  }
+  
+  public String getVersionNumber() {  return versionNumber; }
+  
+  public String getLocale() { return locale;  }
+  
+  public HashSet<Word> getWords() { return words; }
 }
