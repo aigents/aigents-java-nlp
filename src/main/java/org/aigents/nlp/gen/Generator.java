@@ -74,7 +74,7 @@ public class Generator {
 					HashSet<String> sentence = generateSentence(w);
 					if (tooMuch) {
 						much++;
-						System.out.println(Arrays.toString(w) + ": " + new String[] {"Too many results"});
+						System.out.println(Arrays.toString(w) + ": Too many results to display.");
 						continue;
 					}
 					System.out.println(Arrays.toString(w) + ": " + sentence);
@@ -583,7 +583,7 @@ public class Generator {
 	private static String replaceNull(String lr) {
 		while (lr.contains("()")) {
 			int idx = lr.indexOf("()");
-			int end = lr.indexOf(" ", idx);
+			int end = lr.indexOf(" ", idx) != -1? lr.indexOf(" ", idx) : lr.length()-1;
 			if (lr.charAt(end-1)=='}') return lr;
 			if (lr.charAt(end-1)==')') {
 				for (int i = end-2; i >= 0; i--) {
@@ -723,14 +723,14 @@ public class Generator {
 						}
 					}
 					String str3 = str.substring(0, nowId) + " now" + str.substring(nowId);
-					ret.add(str3);
+					add(ret, str3, elements);
 				}
 			}
 			if (not && !now) {
 				if (check(input) && isValid(input)) {
 					String str = makeSentence(input);
 					str = str.replace(" a", " not a");
-					ret.add(str);
+					add(ret, str, elements);
 				}
 			}
 			if (not && now) {
@@ -745,17 +745,17 @@ public class Generator {
 					}
 					String str3 = str.substring(0, nowId) + " now" + str.substring(nowId);
 					str3 = str3.replace(" a", " not a");
-					ret.add(str3);
+					add(ret, str3, elements);
 				}
 			}
 		} else {
 			if (check(elements) && isValid(elements)) {
-				ret.add(makeSentence(elements));
+				add(ret, makeSentence(elements), elements);
 			}
 		}
 		int i = 0;
 		long threshold = 120000;
-		long maxNum = 10;
+		long maxNum = 25;
 		while (i < n) {
 			long curr = System.currentTimeMillis();
 			if (curr - start > threshold) {
@@ -793,10 +793,10 @@ public class Generator {
 								}
 							}
 							if (nowId == 0) {
-								ret.add("Now " + str.toLowerCase());
+								add(ret, "Now " + str.toLowerCase(), elements);
 							} else {
 								String str3 = str.substring(0, nowId) + " now" + str.substring(nowId);
-								ret.add(str3);
+								add(ret, str3, elements);
 							}
 						}
 					}
@@ -804,7 +804,7 @@ public class Generator {
 						if (check(input) && isValid(input)) {
 							String str = makeSentence(input);
 							str = str.replace(" a", " not a");
-							ret.add(str);
+							add(ret, str, elements);
 						}
 					}
 					if (not && now) {
@@ -819,12 +819,12 @@ public class Generator {
 							}
 							String str3 = str.substring(0, nowId) + " now" + str.substring(nowId);
 							str3 = str3.replace(" a", " not a");
-							ret.add(str3);
+							add(ret, str3, elements);
 						}
 					}
 				} else {
 					if (check(elements) && isValid(elements)) {
-						ret.add(makeSentence(elements));
+						add(ret, makeSentence(elements), elements);
 					}
 				}
 				indexes[i]++;
@@ -838,6 +838,19 @@ public class Generator {
 			tooMuch = true;
 			return new HashSet<>();
 		} else return ret;
+	}
+	
+	private static void add(HashSet<String> ret, String str, String[] elements) {
+		if (str.contains(",")) {
+			String[] spl = str.split(" ");
+			int count = spl.length;
+			for (String s : spl) {
+				if (s.contains(",")) count++;
+			}
+			if (count == elements.length) ret.add(str);
+		} else {
+			if (str.split(" ").length == elements.length) ret.add(str);
+		}
 	}
 	
 	private static boolean isValid(String[] input) {
@@ -880,6 +893,8 @@ public class Generator {
 				if (connects(left, right, input[i + 1])) {
 					continue outer;
 				}
+			} else if (right.equals("before") && i-2>=0) {
+				if (connects(input[i-2], right)) continue outer;
 			} else if (left.equals("on") && right.equals("the") && i+2<input.length) {
 				i++;
 				if (connects(left, right, input[i+1])) continue outer;
