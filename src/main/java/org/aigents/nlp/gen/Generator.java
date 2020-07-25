@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Disjunct;
@@ -43,13 +44,16 @@ import main.java.org.aigents.nlp.lg.Word;
 
 public class Generator {
 	public static Dictionary dict, hyphenated;
+	public static boolean tooMuch = false;
 	
 	public static void main(String[] args) throws IOException {
+		long startTime = System.currentTimeMillis();
 		if (args.length == 2) {
 			int single = 0;
 			int multOne = 0;
 			int multNo = 0;
 			int no = 0;
+			int much = 0;
 			try {
 				if (args[0].contains("/4.0.dict")) {
 					Dictionary[] dicts = Loader.buildLGDict(args[0]);
@@ -68,6 +72,11 @@ public class Generator {
 				for (String[] w : words) {
 					idx++;
 					HashSet<String> sentence = generateSentence(w);
+					if (tooMuch) {
+						much++;
+						System.out.println(Arrays.toString(w) + ": " + new String[] {"Too many results"});
+						continue;
+					}
 					System.out.println(Arrays.toString(w) + ": " + sentence);
 					String s = list.get(idx);
 					if (sentence.size() > 1) {
@@ -102,7 +111,21 @@ public class Generator {
 				System.out.println("Multiple with one correct: " + multOne + "/" + words.size());
 				System.out.println("Multiple with none correct: " + multNo + "/" + words.size());
 				System.out.println("None correct: " + no + "/" + words.size());
+				System.out.println("Too many results: " + much + "/" + words.size());
 				System.out.println("Accuracy: " + ((double) single) / words.size());
+				long runtime = System.currentTimeMillis() - startTime;
+				String t = String.format("%d min, %d sec", 
+					    TimeUnit.MILLISECONDS.toMinutes(runtime),
+					    TimeUnit.MILLISECONDS.toSeconds(runtime) - 
+					    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime))
+					);
+				String t2 = String.format("%d min, %d sec", 
+					    TimeUnit.MILLISECONDS.toMinutes(runtime/words.size()),
+					    TimeUnit.MILLISECONDS.toSeconds(runtime) - 
+					    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime))
+					);
+				System.out.println("Overall runtime: " + t);
+				System.out.println("Avg. runtime per sentence: " + t2);
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
@@ -664,6 +687,7 @@ public class Generator {
 	}
 	
 	public static HashSet<String> generateSentence(String[] elements) {		
+		long start = System.currentTimeMillis();
 		boolean not = false;
 		boolean now = false;
 		HashSet<String> ret = new HashSet<>();
@@ -730,7 +754,16 @@ public class Generator {
 			}
 		}
 		int i = 0;
+		long threshold = 120000;
+		long maxNum = 10;
 		while (i < n) {
+			long curr = System.currentTimeMillis();
+			if (curr - start > threshold) {
+				if (ret.size() > maxNum) {
+					tooMuch = true;
+					return new HashSet<>();
+				} else return ret;
+			}
 			if (indexes[i] < i) {
 				swap(elements, i % 2 == 0 ? 0 : indexes[i], i);
 				ArrayList<String> w2 = new ArrayList<>(Arrays.asList(elements));
@@ -801,7 +834,10 @@ public class Generator {
 				i++;
 			}
 		}
-		return ret;
+		if (ret.size() > maxNum) {
+			tooMuch = true;
+			return new HashSet<>();
+		} else return ret;
 	}
 	
 	private static boolean isValid(String[] input) {
@@ -1003,7 +1039,20 @@ public class Generator {
 			for (String sentence : sentences) {
 				String[] w = sentence.split(" ");
 				w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
-				words.add(w);
+				ArrayList<String> l = new ArrayList<>();
+				for (String word : w) {
+					if (word.contains(",")) {
+						l.add(word.substring(0, word.indexOf(",")));
+						l.add(",");
+					} else {
+						l.add(word);
+					}
+				}
+				String[] newWords = new String[l.size()];
+				for (int i = 0; i < l.size(); i++) {
+					newWords[i] = l.get(i);
+				}
+				words.add(newWords);
 			}
 			return words;
 		} catch (Exception e) {
@@ -1066,6 +1115,9 @@ public class Generator {
 	private static String makeSentence(String[] arr) {
 		String ret = "";
 		for (int i = 0; i < arr.length - 1; i++) {
+			if (arr[i].equals(",")) {
+				ret = ret.substring(0, ret.length() - 1);
+			}
 			ret += arr[i] + " ";
 		}
 		ret += arr[arr.length - 1] + ".";

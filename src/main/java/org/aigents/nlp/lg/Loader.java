@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -153,9 +154,10 @@ public class Loader {
 					i++;
 				}
 				str += " " + lines[i].substring(0, lines[i].length()-1);
-				if (str.contains("\"%\"")) str.replaceAll("\"%\"", "%");
+				if (str.contains("\"%\"")) str = str.replace("\"%\"", "%");
 				String[] parts = getParts(str);
 				parts[1] = processString(parts[1]);
+				parts[0] = parts[0].replace("\"", "");
 				for (int k = 0; k < parts.length; k++) parts[k] = parts[k].trim();
 				for (String word : parts[0].split(" ")) {
 					addRule(dict, hyphenated, macros, word, parts[1]);
@@ -199,7 +201,7 @@ public class Loader {
 	
 	private static void addRule(Dictionary dict, Dictionary hyphenated, HashMap<String, String> macros, String word, String rule) {
 		Word w;
-		if (word.contains(".")) {
+		if (word.contains(".") && word.length() > 1) {
 			String[] split = word.split("\\.");
 			if (split.length == 1) w = new Word(split[0]);
 			else w = new Word(split[0], split[1]);
