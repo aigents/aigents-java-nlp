@@ -75,6 +75,7 @@ public class Generator {
 					if (tooMuch) {
 						much++;
 						System.out.println(Arrays.toString(w) + ": Too many results to display.");
+						tooMuch = false;
 						continue;
 					}
 					System.out.println(Arrays.toString(w) + ": " + sentence);
@@ -754,7 +755,7 @@ public class Generator {
 			}
 		}
 		int i = 0;
-		long threshold = 120000;
+		long threshold = 180000;
 		long maxNum = 25;
 		while (i < n) {
 			long curr = System.currentTimeMillis();
