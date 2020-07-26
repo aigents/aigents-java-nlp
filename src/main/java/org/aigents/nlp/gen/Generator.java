@@ -37,10 +37,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
-import main.java.org.aigents.nlp.lg.Disjunct;
 import main.java.org.aigents.nlp.lg.Loader;
 import main.java.org.aigents.nlp.lg.Rule;
-import main.java.org.aigents.nlp.lg.Word;
 
 public class Generator {
 	public static Dictionary dict, hyphenated;
@@ -122,8 +120,8 @@ public class Generator {
 					);
 				String t2 = String.format("%d min, %d sec", 
 					    TimeUnit.MILLISECONDS.toMinutes(runtime/words.size()),
-					    TimeUnit.MILLISECONDS.toSeconds(runtime) - 
-					    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime))
+					    TimeUnit.MILLISECONDS.toSeconds(runtime/words.size()) - 
+					    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime/words.size()))
 					);
 				System.out.println("Overall runtime: " + t);
 				System.out.println("Avg. runtime per sentence: " + t2);
@@ -884,11 +882,13 @@ public class Generator {
 					if (right.equals("to")) {
 						if (connectsLeft(left, right, input[i+1]) && connects(right, input[i]))
 							continue outer;
-					} else if (right.equals("the")) {
-						if (connectsAll(left, right, input[i], input[i+1]))
-							continue outer;
+					} else if (right.equals("the")) {						
+						if (connects(left, input[i]) && connects(right, input[i]) && connects(left, input[i+1])) continue outer;
 					}
 				}
+			} else if (left.equals("on") && right.equals("the") && i+2<input.length) {
+				i++;
+				if (connects(left, input[i+1]) && connects(right, input[i+1])) continue outer;
 			} else if ((right.equals("a") || right.equals("the")) && i + 2 < input.length) {
 				i++;
 				if (connects(left, right, input[i + 1])) {
@@ -896,9 +896,6 @@ public class Generator {
 				}
 			} else if (right.equals("before") && i-2>=0) {
 				if (connects(input[i-2], right)) continue outer;
-			} else if (left.equals("on") && right.equals("the") && i+2<input.length) {
-				i++;
-				if (connects(left, right, input[i+1])) continue outer;
 			} else {
 				if (connects(left, right)) {
 					continue outer;
@@ -937,64 +934,10 @@ public class Generator {
 		Object[] leftRight = connectsIdx(left, right, true);
 		return (boolean) leftMid[0] && (boolean) leftRight[0] && (int) leftMid[1] < (int) leftRight[1];
 	}
-
-	private static boolean connectsAll(String left, String mid, String right, String next) {
-		ArrayList<Rule> leftList = dict.getRule(left), midList=dict.getRule(mid), rightList = dict.getRule(right), nextList = dict.getRule(next);
-		if (leftList.size()==0) {
-			System.err.println("Word '" + left + "' not found in dictionary.");
-			System.exit(0);
-		}
-		if (midList.size()==0) {
-			System.err.println("Word '" + mid + "' not found in dictionary.");
-			System.exit(0);
-		}
-		if (rightList.size()==0) {
-			System.err.println("Word '" + right + "' not found in dictionary.");
-			System.exit(0);
-		}
-		if (nextList.size()==0) {
-			System.err.println("Word '" + next + "' not found in dictionary.");
-			System.exit(0);
-		}
-		boolean one = false;
-		boolean two = false;
-		for (Rule leftRule : leftList) {
-			for (Disjunct dl : leftRule.getDisjuncts()) {
-				String wl = "";
-				if (dl.getConnectors().size() > 1) {
-					for (int ci = 0; ci < dl.getConnectors().size() - 1; ci++) {
-						String c = dl.getConnectors().get(ci);
-						if (!c.contains("-")) {
-							wl += c + " & ";
-						}
-					}
-					String c = dl.getConnectors().get(dl.getConnectors().size() - 1);
-					if (!c.contains("-")) {
-						wl += c;
-					} else {
-						if (wl.contains("&"))
-							wl = wl.substring(0, wl.length() - 3);
-					}
-				} else {
-					wl = dl.getConnectors().get(0);
-				}
-				if (!wl.contains("&")) continue;
-				String[] parts = wl.split(" & ");
-				for (int idp = 0; idp < parts.length; idp++) {
-					String part = parts[idp];
-					Rule r = new Rule();
-					r.addWord(part);
-					dict.addWord(new Word(part.toLowerCase(), r));
-					if (connects(part, mid, right)) one = true;
-					if (connects(part, next)) two = true;
-				}
-			}
-			if (one&&two) return true;
-		}
-		return one && two;
-	}
 	
 	private static boolean equals(String wlu, String wr) {
+		wlu = wlu.replace("@", "");
+		wr = wr.replace("@", "");
 		if (wlu.equals(wr)) {
 			return true;
 		}

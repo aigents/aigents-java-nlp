@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Disjunct;
@@ -45,6 +46,7 @@ public class SmallGrammarGen {
   public static Dictionary dict, hyphenated;
 
   public static void main(String[] args) throws IOException {
+    long startTime = System.currentTimeMillis();
     if (args.length == 2) {
       int single = 0;
       int multOne = 0;
@@ -56,7 +58,7 @@ public class SmallGrammarGen {
           dict = dicts[0];
           hyphenated = dicts[1];
         } else {
-          dict = Loader.grammarBuildLinks(args[0], false);
+          dict = Loader.grammarBuildLinks(args[0], true);
         }
         List<String> list = getList(args[1]);
         List<String[]> words = processSentences(args[1]);
@@ -103,6 +105,19 @@ public class SmallGrammarGen {
         System.out.println("Multiple with none correct: " + multNo + "/" + words.size());
         System.out.println("None correct: " + no + "/" + words.size());
         System.out.println("Accuracy: " + ((double) single) / words.size());
+        long runtime = System.currentTimeMillis() - startTime;
+        String t = String.format("%d min, %d sec", 
+              TimeUnit.MILLISECONDS.toMinutes(runtime),
+              TimeUnit.MILLISECONDS.toSeconds(runtime) - 
+              TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime))
+          );
+        String t2 = String.format("%d min, %d sec", 
+              TimeUnit.MILLISECONDS.toMinutes(runtime/words.size()),
+              TimeUnit.MILLISECONDS.toSeconds(runtime/words.size()) - 
+              TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime/words.size()))
+          );
+        System.out.println("Overall runtime: " + t);
+        System.out.println("Avg. runtime per sentence: " + t2);
       } catch (Exception e) {
         System.err.println("Error building dictionary. Please try again with a different filename.");
       }
@@ -113,7 +128,7 @@ public class SmallGrammarGen {
           dict = dicts[0];
           hyphenated = dicts[1];
         } else {
-          dict = Loader.grammarBuildLinks(args[0], false);
+          dict = Loader.grammarBuildLinks(args[0], true);
         }
         String[] words = new String[args.length - 1];
         for (int i = 1; i < args.length; i++) {
@@ -974,9 +989,9 @@ public class SmallGrammarGen {
         }
       } else {
         if (System.getProperty("user.dir").endsWith("src")) {
-          p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen" + path).toAbsolutePath().toString());
+          p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
         } else {
-          p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen" + path).toAbsolutePath().toString());
+          p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
         }
       }
       File f = p.toFile();
@@ -1009,9 +1024,9 @@ public class SmallGrammarGen {
         }
       } else {
         if (System.getProperty("user.dir").endsWith("src")) {
-          p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen" + path).toAbsolutePath().toString());
+          p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
         } else {
-          p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen" + path).toAbsolutePath().toString());
+          p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
         }
       }
       File f = p.toFile();
