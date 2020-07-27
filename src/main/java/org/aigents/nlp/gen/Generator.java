@@ -685,7 +685,7 @@ public class Generator {
 		return l.replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("}", "").replace("{", "").trim();
 	}
 	
-	public static HashSet<String> generateSentence(String[] elements) {		
+	public static HashSet<String> generateSentence(String[] elements) {	
 		long start = System.currentTimeMillis();
 		boolean not = false;
 		boolean now = false;
@@ -889,7 +889,7 @@ public class Generator {
 			} else if (left.equals("on") && right.equals("the") && i+2<input.length) {
 				i++;
 				if (connects(left, input[i+1]) && connects(right, input[i+1])) continue outer;
-			} else if ((right.equals("a") || right.equals("the")) && i + 2 < input.length) {
+			} else if ((right.equals("a") || right.equals("the")) && !left.equals("has") && i + 2 < input.length) {
 				i++;
 				if (connects(left, right, input[i + 1])) {
 					continue outer;
