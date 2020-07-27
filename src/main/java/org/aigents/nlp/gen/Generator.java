@@ -111,7 +111,7 @@ public class Generator {
 				System.out.println("Multiple with none correct: " + multNo + "/" + words.size());
 				System.out.println("None correct: " + no + "/" + words.size());
 				System.out.println("Too many results: " + much + "/" + words.size());
-				System.out.println("Accuracy: " + ((double) single) / words.size());
+				System.out.println("Accuracy: " + ((double) single + multOne) / words.size());
 				long runtime = System.currentTimeMillis() - startTime;
 				String t = String.format("%d min, %d sec", 
 					    TimeUnit.MILLISECONDS.toMinutes(runtime),
