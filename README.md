@@ -1,7 +1,16 @@
 # aigents-java-nlp
-Natural language processing components and tools for [Aigents](https://aigents.com/). Constructs a grammatically valid sentence from given parses. Refer to [this issue](https://github.com/aigents/aigents-java/issues/22) for a list of completed tasks and [this repository](https://github.com/aigents/aigents-java-nlp) for the finalized codebase.
+Natural language processing components and tools for [Aigents](https://aigents.com/). Constructs a grammatically valid sentence from given parses or segments a given sentence. Refer to [this issue](https://github.com/aigents/aigents-java/issues/22) for a list of completed tasks and [this repository](https://github.com/aigents/aigents-java-nlp) for the finalized codebase.
 
 To build the project, run `ant war` in the command line.
+
+To test `Segment.java`, run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    java main.java.org.aigents.nlp.gen.Segment en/4.0.dict tuna is a fish eagle is a bird dog is a mammal
+    
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then segment the sentence specified by the subsequent arguments (`tuna`, `is`, `a`, etc. in the line above).
 
 To test `Generator.java`, choose one of the following two options:
 
