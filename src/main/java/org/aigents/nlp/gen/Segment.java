@@ -42,7 +42,6 @@ public class Segment {
 	public static Dictionary dict, hyphenated;
 
 	public static void main(String[] args) throws IOException {
-		args = new String[] {"en/4.0.dict", "I", "am", "glad"};
 		if (args.length > 1) {
 			try {
 				if (args[0].contains("/4.0.dict")) {
