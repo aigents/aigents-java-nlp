@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,7 +39,6 @@ import main.java.org.aigents.nlp.lg.Rule;
 
 public class Segment {
 	public static Dictionary dict, hyphenated;
-	public static boolean tooMuch = false;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length > 1) {
@@ -61,14 +59,15 @@ public class Segment {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
 		} else {
-			System.out.println("Invalid command line parameters. Include [path/to/dict] followed by the sentence.");
-		}		
+			System.out.println("Invalid or nonexistent command line parameters. Include [path/to/dict] followed by the sentence.");
+		}	
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
 		ArrayList<String> ret = new ArrayList<>();
 		int idx = 0;
 		while (idx < words.length) {
+			boolean valid = false;
 			for (int i = idx; i < words.length; i++) {
 				String[] arr = new String[i-idx+1];
 				for (int a = idx; a <= i; a++) {
@@ -77,8 +76,14 @@ public class Segment {
 				if ((i+1>=words.length? true : check(words[i+1])) && isValid(arr)) {
 					ret.add(makeSentence(arr));
 					idx = i+1;
+					valid = true;
 					break;
 				}
+			}
+			if (!valid) {
+				ret.clear();
+				ret.add("No valid sentences.");
+				break;
 			}
 		}
 		return ret;
