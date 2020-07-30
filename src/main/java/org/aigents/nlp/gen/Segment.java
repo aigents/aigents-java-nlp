@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class Segment {
 			}
 		} else {
 			System.out.println("Invalid or nonexistent command line parameters. Include [path/to/dict] followed by the sentence.");
-		}	
+		}
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -73,7 +74,7 @@ public class Segment {
 				for (int a = idx; a <= i; a++) {
 					arr[a-idx] = words[a];
 				}
-				if ((i+1>=words.length? true : check(words[i+1])) && isValid(arr)) {
+				if (i != words.length - 2 && (i+1>=words.length? true : check(words[i+1])) && check(arr) && isValid(arr)) {
 					ret.add(makeSentence(arr));
 					idx = i+1;
 					valid = true;
@@ -89,6 +90,28 @@ public class Segment {
 		return ret;
 	}
 	
+	private static boolean check(String[] input) {
+		if (input.length <= 1) return false;
+		String first = input[0].toLowerCase().trim();
+		String last = input[input.length - 1].toLowerCase().trim();
+		if (contains(input, "in") && last.equals("wise")) return false;
+		if (last.equals("of") || first.equals("of"))
+			return false;
+		if (last.equals("on") || first.equals("on"))
+			return false;
+		if (last.equals("with") || first.equals("with"))
+			return false;
+		if (first.equals("board"))
+			return false;
+		if (first.equals("in") || last.equals("in")) return false;
+		if (first.equals("writes") || first.equals("wants") || first.equals("has") || first.equals("sees")
+				|| first.equals("sawed") || first.equals("knocked") || first.startsWith("like") || first.equals("is")
+				|| first.equals("was")) {
+			return false;
+		}
+		return true;
+	}
+	
 	private static String display(String[] words) {
 		String ret = "";
 		for (String word : words) {
@@ -100,6 +123,7 @@ public class Segment {
 
 	private static boolean check(String first) {
 		if (first.equals("of")) return false;
+		if (first.equals("in")) return false;
 		if (first.equals("on")) return false;
 		if (first.equals("with")) return false;
 		if (first.equals("board")) return false;
@@ -111,6 +135,84 @@ public class Segment {
 		return true;
 	}
 
+	private static boolean isValid(String[] input) {
+		if (idx(input, "A") != -1 && idx(input, "A") != 0)
+			return false;
+		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
+				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
+						|| dict.getSubscript(input[0]).contains("p")))
+			return false;
+		for (int i = 0; i < input.length; i++) {
+			if (!input[i].equals("A")) {
+				input[i] = input[i].toLowerCase().trim();
+			}
+		}
+		String last = input[input.length - 1].toLowerCase().trim();
+		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
+				&& !dict.getSubscript(last).contains("r") 
+				&& !dict.getSubscript(last).contains("a") 
+				&& !dict.getSubscript(last).contains("n-u"))))
+			return false;
+		outer: for (int i = 0; i < input.length - 1; i++) {
+			String left = input[i];
+			String right = input[i + 1];
+			if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
+				return false;
+			if ((dict.getRule(left.toLowerCase()).get(0).toString().equals(dict.getRule("sawed").get(0).toString())
+					|| (dict.getRule(left.toLowerCase()).get(0).toString()
+							.equals(dict.getRule("writes").get(0).toString()) && contains(input, "to"))
+					|| left.equals("saw")) && (idx(input, "with") == i + 2 || idx(input, "with") == i + 3)) {
+				int idx = idx(input, "with");
+				if (idx == i + 2) {
+					i = idx - 1;
+					if (connectsLeft(left, right, input[i + 1]))
+						continue outer;
+				} else {
+					i = idx - 1;
+					if (right.equals("to")) {
+						if (connectsLeft(left, right, input[i + 1]) && connects(right, input[i]))
+							continue outer;
+					} else if (right.equals("the")) {
+						if (connects(left, input[i]) && connects(right, input[i]) && connects(left, input[i + 1]))
+							continue outer;
+					}
+				}
+			} else if (left.equals("in")) {
+				if (connects(left, input[input.length - 1])) continue outer;
+			} else if (left.equals("on") && right.equals("the") && i + 2 < input.length) {
+				i++;
+				if (connects(left, input[i + 1]) && connects(right, input[i + 1]))
+					continue outer;
+			} else if ((right.equals("a") || right.equals("the")) && !left.equals("has") && i + 2 < input.length) {
+				i++;
+				if (connects(left, right, input[i + 1])) {
+					continue outer;
+				}
+			} else if (right.equals("before") && i - 2 >= 0) {
+				if (connects(input[i - 2], right))
+					continue outer;
+			} else {
+				if (connects(left, right)) {
+					continue outer;
+				}
+				if (right.equals("with")) {
+					int idx;
+					for (idx = 0; idx < input.length; idx++) {
+						if (input[idx].equals("on")) {
+							break;
+						}
+					}
+					if (idx > i) {
+						if (connectsLeft(left, right, "on"))
+							continue outer;
+					}
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+	
 	private static boolean connects(String left, String right) {
 		if (!checkLR(left, right))
 			return false;
@@ -742,79 +844,6 @@ public class Segment {
 	private static String format(String l) {
 		return l.replace("(", "").replace(")", "").replace("[", "").replace("]", "").replace("}", "").replace("{", "")
 				.trim();
-	}
-
-	private static boolean isValid(String[] input) {
-		if (idx(input, "A") != -1 && idx(input, "A") != 0)
-			return false;
-		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
-				&& !(dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")))
-			return false;
-		for (int i = 0; i < input.length; i++) {
-			if (!input[i].equals("A")) {
-				input[i] = input[i].toLowerCase().trim();
-			}
-		}
-		String last = input[input.length - 1].toLowerCase().trim();
-		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
-				&& !dict.getSubscript(last).contains("r") && !dict.getSubscript(last).contains("n-u"))))
-			return false;
-		outer: for (int i = 0; i < input.length - 1; i++) {
-			String left = input[i];
-			String right = input[i + 1];
-			if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
-				return false;
-			if ((dict.getRule(left.toLowerCase()).get(0).toString().equals(dict.getRule("sawed").get(0).toString())
-					|| (dict.getRule(left.toLowerCase()).get(0).toString()
-							.equals(dict.getRule("writes").get(0).toString()) && contains(input, "to"))
-					|| left.equals("saw")) && (idx(input, "with") == i + 2 || idx(input, "with") == i + 3)) {
-				int idx = idx(input, "with");
-				if (idx == i + 2) {
-					i = idx - 1;
-					if (connectsLeft(left, right, input[i + 1]))
-						continue outer;
-				} else {
-					i = idx - 1;
-					if (right.equals("to")) {
-						if (connectsLeft(left, right, input[i + 1]) && connects(right, input[i]))
-							continue outer;
-					} else if (right.equals("the")) {
-						if (connects(left, input[i]) && connects(right, input[i]) && connects(left, input[i + 1]))
-							continue outer;
-					}
-				}
-			} else if (left.equals("on") && right.equals("the") && i + 2 < input.length) {
-				i++;
-				if (connects(left, input[i + 1]) && connects(right, input[i + 1]))
-					continue outer;
-			} else if ((right.equals("a") || right.equals("the")) && !left.equals("has") && i + 2 < input.length) {
-				i++;
-				if (connects(left, right, input[i + 1])) {
-					continue outer;
-				}
-			} else if (right.equals("before") && i - 2 >= 0) {
-				if (connects(input[i - 2], right))
-					continue outer;
-			} else {
-				if (connects(left, right)) {
-					continue outer;
-				}
-				if (right.equals("with")) {
-					int idx;
-					for (idx = 0; idx < input.length; idx++) {
-						if (input[idx].equals("on")) {
-							break;
-						}
-					}
-					if (idx > i) {
-						if (connectsLeft(left, right, "on"))
-							continue outer;
-					}
-				}
-			}
-			return false;
-		}
-		return true;
 	}
 
 	private static boolean connects(String left, String mid, String right) {
