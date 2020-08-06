@@ -158,6 +158,7 @@ public class Segment {
 			if (subs.size() == 1 && (subs.contains("m") || subs.contains("l") || subs.contains("f"))) {
 				word = word.substring(0,1).toUpperCase() + word.substring(1);
 			}
+			if (word.equals(",")) ret = ret.substring(0, ret.length() - 1);
 			ret += word + " ";
 		}
 		ret = ret.substring(0,1).toUpperCase() + ret.substring(1, ret.length() - 1) + ".";
@@ -329,8 +330,6 @@ public class Segment {
 			for (Rule rightRule : rightList) {
 				String lr = leftRule.toString();
 				String rr = rightRule.toString();
-				System.out.println(lr);
-				System.out.println(rr);
 				lr = beforeNull(lr);
 				rr = beforeNull(rr);
 				lr = replaceNull(lr);
