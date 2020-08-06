@@ -61,6 +61,24 @@ public class Segment {
 		} else {
 			System.out.println("Invalid or nonexistent command line parameters. Include [path/to/dict] followed by the sentence.");
 		}
+		dict = Loader.buildLGDict("en/4.0.dict")[0];
+		hyphenated = Loader.buildLGDict("en/4.0.dict")[1];
+		List<String> s = processSentences("gutenberg544.txt");
+		ArrayList<String> par = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			String sen = s.get(i);
+			for (String word : sen.split(" ")) {
+				if (word.contains(".")) word = word.replace(".", "");
+				par.add(word);
+			}
+		}
+		String[] words = new String[par.size()];
+		int i = 0;
+		for (String word : par) {
+			words[i] = word;
+			i++;
+		}
+		System.out.println(display(words) + ": " + segment(words));
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -128,19 +146,21 @@ public class Segment {
 	
 	private static String sentence(String[] words) {
 		String ret = "";
-		for (String word : words) {
+		for (int i = 0; i < words.length; i++) {
+			words[i] = words[i].toLowerCase();
+			String word = words[i];
+			word = word.toLowerCase();
 			ArrayList<String> subs;
-			try {
-				subs = dict.getSubscript(word);
-			} catch (Exception e) {
-				subs = new ArrayList<>();
+			subs = dict.getSubscript(word);
+			if (subs.isEmpty()) {
+				subs = dict.getSubscript(word.substring(0,1).toUpperCase() + word.substring(1));
 			}
-			if (subs.contains("m") || subs.contains("l") || subs.contains("f")) {
+			if (subs.size() == 1 && (subs.contains("m") || subs.contains("l") || subs.contains("f"))) {
 				word = word.substring(0,1).toUpperCase() + word.substring(1);
 			}
 			ret += word + " ";
 		}
-		ret = ret.substring(0, ret.length() - 1);
+		ret = ret.substring(0,1).toUpperCase() + ret.substring(1, ret.length() - 1) + ".";
 		return ret;
 	}
 	
