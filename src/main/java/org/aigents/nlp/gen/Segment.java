@@ -1138,35 +1138,6 @@ public class Segment {
 		}
 	}
 
-	public static List<String> getList(String path) throws IOException {
-		try {
-			Path p;
-			if (path.contains("/4.0.dict")) {
-				if (System.getProperty("user.dir").endsWith("src")) {
-					p = Paths.get(Paths.get("../data/" + path).toAbsolutePath().toString());
-				} else {
-					p = Paths.get(Paths.get("data/" + path).toAbsolutePath().toString());
-				}
-			} else {
-				if (System.getProperty("user.dir").endsWith("src")) {
-					p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
-				} else {
-					p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
-				}
-			}
-			File f = p.toFile();
-			List<String> sentences = Files.readAllLines(f.toPath());
-			Iterator<String> it = sentences.iterator();
-			while (it.hasNext()) {
-				if (it.next().isEmpty())
-					it.remove();
-			}
-			return sentences;
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
 	private static boolean contains(String[] input, String str) {
 		for (String s : input) {
 			if (s.equals(str))
