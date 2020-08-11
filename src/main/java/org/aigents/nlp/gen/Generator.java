@@ -360,24 +360,10 @@ public class Generator {
 		if (input.length <= 1) return false;
 		if (!check(input[0], input[1])) return false;
 		String first = input[0].toLowerCase().trim();
-		String last = input[input.length - 1].toLowerCase().trim();
-		if (contains(input, "in") && last.equals("wise")) return false;
-		if (last.equals("of") || first.equals("of"))
-			return false;
-		if (last.equals("on") || first.equals("on"))
-			return false;
-		if ((last.equals("with") && !input[input.length - 2].equals("begin")) || last.equals("the") || first.equals("with"))
-			return false;
-		if (first.equals("board") || last.equals("been") || last.equals("at")) return false;
-		if (last.equals("in") || last.equals("barry")) return false;
-		if (first.equals("in") && !input[1].equals("a") && !input[2].equals("way")) return false;
 		if ((dict.getSubscript(first).contains("v") || dict.getSubscript(first).contains("v") 
 				&& !(dict.getSubscript(first).contains("n") || dict.getSubscript(first).contains("n-u")))) {
 			return false;
 		}
-		if (last.equals("when") || last.equals("last") || last.equals("by")) return false;
-		if (contains(input, "a") && dict.getSubscript(last).contains("a")) return false;
-		if (idx(input, "but") == input.length - 2 || last.equals("but")) return false;
 		boolean containsVerb = false;
 		for (String word : input) {
 			ArrayList<String> subs;
@@ -419,14 +405,6 @@ public class Generator {
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
 		second = second.toLowerCase();
-		if (first.equals("of") || first.equals("or")) return false;
-		if (first.equals("ones")) return false;
-		if (first.equals(",")) return false;
-		if (first.equals("in") && !second.equals("a")) return false;
-		if (first.equals("on")) return false;
-		if (first.equals("with")) return false;
-		if (first.equals("board")) return false;
-		if ((first.equals("her") || first.equals("his")) && !dict.getSubscript(second).contains("n")) return false;
 		List<String> subs;
 		try {
 			subs = dict.getSubscript(first);
@@ -437,7 +415,6 @@ public class Generator {
 		if (subs.contains("v") || subs.contains("v-d") && !subs.contains("n") && !subs.contains("n-u")) {
 			return false;
 		}
-		if (first.equals("other") && second.equals("they")) return false;
 		return true;
 	}
 
@@ -939,65 +916,15 @@ public class Generator {
 	}
 
 	private static boolean checkLR(String left, String right) {
-		if (left.equals("the") && right.equals("intervening")) return true;
 		if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
 			return false;
-		if (left.toLowerCase().equals("a") && right.equals("is"))
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u") && dict.getSubscript(right.toLowerCase().trim()).contains("m"))
 			return false;
-		if (left.toLowerCase().equals("directors") && right.toLowerCase().equals("on"))
+		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u") && dict.getSubscript(left.toLowerCase().trim()).contains("m"))
 			return false;
-		if (left.toLowerCase().trim().equals("of") && right.toLowerCase().trim().equals("is"))
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u") && dict.getSubscript(right.toLowerCase().trim()).contains("f"))
 			return false;
-		if (left.toLowerCase().trim().equals("the") && right.toLowerCase().trim().equals("a")) return false;
-		if (left.toLowerCase().trim().equals("a") && right.toLowerCase().trim().equals("the")) return false;
-		if (left.toLowerCase().trim().equals("a") && right.toLowerCase().trim().equals(",")) return false;
-		if (left.toLowerCase().trim().equals("the") && right.toLowerCase().trim().equals(",")) return false;
-		if (left.toLowerCase().trim().equals("is") && right.toLowerCase().trim().equals("of")) return false;
-		if (left.toLowerCase().trim().equals(",") && right.toLowerCase().trim().equals("garret")) return false;
-		if (left.toLowerCase().equals("a") || right.toLowerCase().equals("a"))
-			return true;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
-				&& dict.getSubscript(right.toLowerCase().trim()).contains("m"))
-			return false;
-		if ((left.equals("a") || left.equals("the")) && 
-				(dict.getSubscript(right.toLowerCase().trim()).contains("v")
-						|| dict.getSubscript(right.toLowerCase().trim()).contains("v-d")) 
-				&& !(dict.getSubscript(right.toLowerCase().trim()).contains("n") 
-						|| dict.getSubscript(right.toLowerCase().trim()).contains("n-u")))
-			return false;
-
-		if ((left.equals("they") || (dict.getSubscript(left.toLowerCase().trim()).contains("m") 
-				|| dict.getSubscript(left.toLowerCase().trim()).contains("f") 
-				|| dict.getSubscript(left.toLowerCase().trim()).contains("l"))) && 
-				(dict.getSubscript(right.toLowerCase().trim()).contains("a")))
-			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
-				&& right.toLowerCase().trim().equals("the"))
-			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("n") && !dict.getSubscript(left.toLowerCase().trim()).contains("a")
-				&& right.toLowerCase().trim().equals("the"))
-			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("m")
-				&& right.toLowerCase().trim().equals("the"))
-			return false;
-		if (left.toLowerCase().trim().equals("was") && right.toLowerCase().trim().equals("garret")) return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("f")
-				&& right.toLowerCase().trim().equals("the"))
-			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("l")
-				&& right.toLowerCase().trim().equals("the"))
-			return false;
-		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u")
-				&& dict.getSubscript(left.toLowerCase().trim()).contains("m"))
-			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
-				&& dict.getSubscript(right.toLowerCase().trim()).contains("f"))
-			return false;
-		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u")
-				&& dict.getSubscript(left.toLowerCase().trim()).contains("f"))
-			return false;
-		if (left.toLowerCase().equals("a") && dict.getSubscript(right).size() == 1
-				&& dict.getSubscript(right).get(0).equals("v"))
+		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u") && dict.getSubscript(left.toLowerCase().trim()).contains("f"))
 			return false;
 		return true;
 	}
