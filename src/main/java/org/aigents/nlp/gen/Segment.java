@@ -61,24 +61,6 @@ public class Segment {
 		} else {
 			System.out.println("Invalid or nonexistent command line parameters. Include [path/to/dict] followed by the sentence.");
 		}
-		dict = Loader.buildLGDict("en/4.0.dict")[0];
-		hyphenated = Loader.buildLGDict("en/4.0.dict")[1];
-		List<String> s = processSentences("gutenberg544.txt");
-		ArrayList<String> par = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			String sen = s.get(i);
-			for (String word : sen.split(" ")) {
-				if (word.contains(".")) word = word.replace(".", "");
-				par.add(word);
-			}
-		}
-		String[] words = new String[par.size()];
-		int i = 0;
-		for (String word : par) {
-			words[i] = word;
-			i++;
-		}
-		System.out.println(display(words) + ": " + segment(words));
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -111,24 +93,6 @@ public class Segment {
 	
 	private static boolean check(String[] input) {
 		if (input.length <= 1) return false;
-		String first = input[0].toLowerCase().trim();
-		String last = input[input.length - 1].toLowerCase().trim();
-		if (contains(input, "in") && last.equals("wise")) return false;
-		if (last.equals("of") || first.equals("of"))
-			return false;
-		if (last.equals("on") || first.equals("on"))
-			return false;
-		if (last.equals("with") || last.equals("the") || first.equals("with"))
-			return false;
-		if (first.equals("board") || last.equals("been") || last.equals("at")) return false;
-		if (first.equals("in") || last.equals("in") || last.equals("barry")) return false;
-		if ((dict.getSubscript(first).contains("v") || dict.getSubscript(first).contains("v") 
-				&& !(dict.getSubscript(first).contains("n") || dict.getSubscript(first).contains("n-u")))) {
-			return false;
-		}
-		if (last.equals("when") || last.equals("last") || last.equals("by")) return false;
-		if (contains(input, "a") && dict.getSubscript(last).contains("a")) return false;
-		if (idx(input, "but") == input.length - 2 || last.equals("but")) return false;
 		boolean containsVerb = false;
 		for (String word : input) {
 			ArrayList<String> subs;
@@ -177,14 +141,6 @@ public class Segment {
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
 		second = second.toLowerCase();
-		if (first.equals("of") || first.equals("or")) return false;
-		if (first.equals("ones")) return false;
-		if (first.equals(",")) return false;
-		if (first.equals("in")) return false;
-		if (first.equals("on")) return false;
-		if (first.equals("with")) return false;
-		if (first.equals("board")) return false;
-		if ((first.equals("her") || first.equals("his")) && !dict.getSubscript(second).contains("n")) return false;
 		List<String> subs;
 		try {
 			subs = dict.getSubscript(first);
@@ -195,7 +151,6 @@ public class Segment {
 		if (subs.contains("v") || subs.contains("v-d") && !subs.contains("n") && !subs.contains("n-u")) {
 			return false;
 		}
-		if (first.equals("other") && second.equals("they")) return false;
 		return true;
 	}
 
@@ -632,16 +587,6 @@ public class Segment {
 	private static boolean checkLR(String left, String right) {
 		if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
 			return false;
-		if (left.toLowerCase().equals("a") && right.equals("is"))
-			return false;
-		if (left.toLowerCase().equals("directors") && right.toLowerCase().equals("on"))
-			return false;
-		if (left.toLowerCase().trim().equals("of") && right.toLowerCase().trim().equals("is"))
-			return false;
-		if (left.toLowerCase().trim().equals("is") && right.toLowerCase().trim().equals("of"))
-			return false;
-		if (left.toLowerCase().equals("a") || right.toLowerCase().equals("a"))
-			return true;
 		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
 				&& dict.getSubscript(right.toLowerCase().trim()).contains("m"))
 			return false;
