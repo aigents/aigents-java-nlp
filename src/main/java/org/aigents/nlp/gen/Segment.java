@@ -41,7 +41,7 @@ public class Segment {
 	public static Dictionary dict, hyphenated;
 
 	public static void main(String[] args) throws IOException {
-		if (args.length > 1) {
+		if (args.length > 2) {
 			try {
 				if (args[0].contains("/4.0.dict")) {
 					Dictionary[] dicts = Loader.buildLGDict(args[0]);
@@ -55,6 +55,29 @@ public class Segment {
 					words[i - 1] = args[i];
 				}
 				System.out.println(display(words) + ": " + segment(words));
+			} catch (Exception e) {
+				System.err.println("Error building dictionary. Please try again with a different filename.");
+			}
+		} else if (args.length == 2) {
+			try {
+				if (args[0].contains("/4.0.dict")) {
+					Dictionary[] dicts = Loader.buildLGDict(args[0]);
+					dict = dicts[0];
+					hyphenated = dicts[1];
+				} else {
+					dict = Loader.grammarBuildLinks(args[0], false);
+				}
+				List<String> w = new ArrayList<>();
+				try {
+					w = processSentences("gutenberg544.txt");
+				} catch (Exception e) {
+					System.err.println("Invalid filename: unable to locate and retrieve text to segment.");
+				}
+				String[] words = new String[w.size()];
+				for (int i = 0; i < w.size(); i++) {
+					words[i] = w.get(i);
+				}
+				System.out.println(display(words)); // + ": " + segment(words)
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
@@ -82,7 +105,6 @@ public class Segment {
 				}
 			}
 			if (!valid) {
-				System.out.println(ret);
 				ret.clear();
 				ret.add("No valid sentences.");
 				break;
@@ -91,8 +113,7 @@ public class Segment {
 		return ret;
 	}
 	
-	private static boolean check(String[] input) {
-		if (input.length <= 1) return false;
+	private static boolean containsVerb(String[] input) {
 		boolean containsVerb = false;
 		for (String word : input) {
 			ArrayList<String> subs;
@@ -106,6 +127,19 @@ public class Segment {
 			}
 		}
 		return containsVerb;
+	}
+	
+	private static boolean check(String[] input) {
+		if (input.length <= 1) return false;
+		int comma = idx(input, ",");
+		if (comma != -1) {
+			String[] in = new String[input.length - comma];
+			for (int i = comma + 1; i < input.length;  i++) {
+				in[i - comma - 1] = input[i];
+			}
+			if (!containsVerb(in)) return false;
+		}
+		return containsVerb(input);
 	}
 	
 	private static String sentence(String[] words) {
@@ -1075,7 +1109,9 @@ public class Segment {
 			for (String sentence : sentences) {
 				String[] w = sentence.split(" ");
 				w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
-				words.add(makeSentence(w));
+				for (String word: w) {
+					words.add(word);
+				}
 			}
 			return words;
 		} catch (Exception e) {

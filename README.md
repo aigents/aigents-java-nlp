@@ -3,7 +3,20 @@ Natural language processing components and tools for [Aigents](https://aigents.c
 
 To build the project, run `ant war` in the command line.
 
-To test `Segment.java`, run
+**Natural Language Segmentation (NLS)**
+
+To test `Segment.java`, choose one of the following two options:
+
+To test on "Anne's House of Dreams" by Lucy Maud Montgomery (`gutenberg544.txt`), run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    java main.java.org.aigents.nlp.gen.Segment en/4.0.dict gutenberg544.txt
+    
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and segment the text given in the file with the path specified in the second argument (`gutenberg544.txt` in the line above).
+
+To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -11,6 +24,8 @@ To test `Segment.java`, run
     java main.java.org.aigents.nlp.gen.Segment en/4.0.dict tuna is a fish eagle is a bird dog is a mammal
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then segment the sentence specified by the subsequent arguments (`tuna`, `is`, `a`, etc. in the line above).
+
+**Natural Language Generation (NLG)**
 
 To test `Generator.java`, choose one of the following two options:
 
