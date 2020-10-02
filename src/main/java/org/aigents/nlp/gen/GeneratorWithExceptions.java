@@ -42,7 +42,7 @@ import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Loader;
 import main.java.org.aigents.nlp.lg.Rule;
 
-public class Generator {
+public class GeneratorWithExceptions {
 	public static Dictionary dict, hyphenated;
 	public static boolean tooMuch = false;
 
@@ -356,14 +356,33 @@ public class Generator {
 		input[b] = tmp;
 	}
 
+	/* check(String[] input)
+	 * Speeds up the runtime of isValid() by automatically weeding out input arrays which don't 
+	 * satisfy LG. For instance, no sentence can have the last word "when", and every sentence must
+	 * contain a verb for it to be a grammatically valid sentence.
+	 */
 	private static boolean check(String[] input) {
 		if (input.length <= 1) return false;
 		if (!check(input[0], input[1])) return false;
 		String first = input[0].toLowerCase().trim();
+		String last = input[input.length - 1].toLowerCase().trim();
+		if (contains(input, "in") && last.equals("wise")) return false;
+		if (last.equals("of") || first.equals("of"))
+			return false;
+		if (last.equals("on") || first.equals("on"))
+			return false;
+		if ((last.equals("with") && !input[input.length - 2].equals("begin")) || last.equals("the") || first.equals("with"))
+			return false;
+		if (first.equals("board") || last.equals("been") || last.equals("at")) return false;
+		if (last.equals("in") || last.equals("barry")) return false;
+		if (first.equals("in") && !input[1].equals("a") && !input[2].equals("way")) return false;
 		if ((dict.getSubscript(first).contains("v") || dict.getSubscript(first).contains("v") 
 				&& !(dict.getSubscript(first).contains("n") || dict.getSubscript(first).contains("n-u")))) {
 			return false;
 		}
+		if (last.equals("when") || last.equals("last") || last.equals("by")) return false;
+		if (contains(input, "a") && dict.getSubscript(last).contains("a")) return false;
+		if (idx(input, "but") == input.length - 2 || last.equals("but")) return false;
 		boolean containsVerb = false;
 		for (String word : input) {
 			ArrayList<String> subs;
@@ -402,9 +421,21 @@ public class Generator {
 		return ret;
 	}
 
+	/* check(String first, String second)
+	 * Speeds up the runtime of isValid() by automatically weeding out input arrays where the first/first and
+	 * second words do not satisfy LG. For example, no sentence can start with a comma.
+	 */
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
 		second = second.toLowerCase();
+		if (first.equals("of") || first.equals("or")) return false;
+		if (first.equals("ones")) return false;
+		if (first.equals(",")) return false;
+		if (first.equals("in") && !second.equals("a")) return false;
+		if (first.equals("on")) return false;
+		if (first.equals("with")) return false;
+		if (first.equals("board")) return false;
+		if ((first.equals("her") || first.equals("his")) && !dict.getSubscript(second).contains("n")) return false;
 		List<String> subs;
 		try {
 			subs = dict.getSubscript(first);
@@ -415,6 +446,7 @@ public class Generator {
 		if (subs.contains("v") || subs.contains("v-d") && !subs.contains("n") && !subs.contains("n-u")) {
 			return false;
 		}
+		if (first.equals("other") && second.equals("they")) return false;
 		return true;
 	}
 
@@ -915,16 +947,73 @@ public class Generator {
 		return false;
 	}
 
+	/* checkLR(String left, String right)
+	 * Speeds up the runtime of connects() by automatically weeding out pairs of words that cannot go together.
+	 * For example, consider the check of "directors" being next to "on". LG will still mark the sentence 
+	 * "Dad and Mom both want their son to be happy and on the board of directors on", but since "directors on"
+	 * is at the very end of the sentence, all the other checks will still be executed. checkLR speeds up the 
+	 * performance while maintaining accuracy.
+	 */
 	private static boolean checkLR(String left, String right) {
+		if (left.equals("the") && right.equals("intervening")) return true;
 		if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
 			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u") && dict.getSubscript(right.toLowerCase().trim()).contains("m"))
+		if (left.toLowerCase().equals("a") && right.equals("is"))
 			return false;
-		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u") && dict.getSubscript(left.toLowerCase().trim()).contains("m"))
+		if (left.toLowerCase().equals("directors") && right.toLowerCase().equals("on"))
 			return false;
-		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u") && dict.getSubscript(right.toLowerCase().trim()).contains("f"))
+		if (left.toLowerCase().trim().equals("of") && right.toLowerCase().trim().equals("is"))
 			return false;
-		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u") && dict.getSubscript(left.toLowerCase().trim()).contains("f"))
+		if (left.toLowerCase().trim().equals("the") && right.toLowerCase().trim().equals("a")) return false;
+		if (left.toLowerCase().trim().equals("a") && right.toLowerCase().trim().equals("the")) return false;
+		if (left.toLowerCase().trim().equals("a") && right.toLowerCase().trim().equals(",")) return false;
+		if (left.toLowerCase().trim().equals("the") && right.toLowerCase().trim().equals(",")) return false;
+		if (left.toLowerCase().trim().equals("is") && right.toLowerCase().trim().equals("of")) return false;
+		if (left.toLowerCase().trim().equals(",") && right.toLowerCase().trim().equals("garret")) return false;
+		if (left.toLowerCase().equals("a") || right.toLowerCase().equals("a"))
+			return true;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
+				&& dict.getSubscript(right.toLowerCase().trim()).contains("m"))
+			return false;
+		if ((left.equals("a") || left.equals("the")) && 
+				(dict.getSubscript(right.toLowerCase().trim()).contains("v")
+						|| dict.getSubscript(right.toLowerCase().trim()).contains("v-d")) 
+				&& !(dict.getSubscript(right.toLowerCase().trim()).contains("n") 
+						|| dict.getSubscript(right.toLowerCase().trim()).contains("n-u")))
+			return false;
+
+		if ((left.equals("they") || (dict.getSubscript(left.toLowerCase().trim()).contains("m") 
+				|| dict.getSubscript(left.toLowerCase().trim()).contains("f") 
+				|| dict.getSubscript(left.toLowerCase().trim()).contains("l"))) && 
+				(dict.getSubscript(right.toLowerCase().trim()).contains("a")))
+			return false;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
+				&& right.toLowerCase().trim().equals("the"))
+			return false;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("n") && !dict.getSubscript(left.toLowerCase().trim()).contains("a")
+				&& right.toLowerCase().trim().equals("the"))
+			return false;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("m")
+				&& right.toLowerCase().trim().equals("the"))
+			return false;
+		if (left.toLowerCase().trim().equals("was") && right.toLowerCase().trim().equals("garret")) return false;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("f")
+				&& right.toLowerCase().trim().equals("the"))
+			return false;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("l")
+				&& right.toLowerCase().trim().equals("the"))
+			return false;
+		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u")
+				&& dict.getSubscript(left.toLowerCase().trim()).contains("m"))
+			return false;
+		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
+				&& dict.getSubscript(right.toLowerCase().trim()).contains("f"))
+			return false;
+		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u")
+				&& dict.getSubscript(left.toLowerCase().trim()).contains("f"))
+			return false;
+		if (left.toLowerCase().equals("a") && dict.getSubscript(right).size() == 1
+				&& dict.getSubscript(right).get(0).equals("v"))
 			return false;
 		return true;
 	}
