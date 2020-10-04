@@ -41,6 +41,7 @@ public class Segment {
 	public static Dictionary dict, hyphenated;
 
 	public static void main(String[] args) throws IOException {
+		args = new String[] {"en/4.0.dict", "gutenberg544.txt"};
 		if (args.length > 2) {
 			try {
 				if (args[0].contains("/4.0.dict")) {
@@ -77,7 +78,7 @@ public class Segment {
 				for (int i = 0; i < w.size(); i++) {
 					words[i] = w.get(i);
 				}
-				System.out.println(display(words)); // + ": " + segment(words)
+				System.out.println(display(words) + ": " + segment(words)); 
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
@@ -98,8 +99,26 @@ public class Segment {
 				}
 				if (i != words.length - 2 && (i+1>=words.length? true : check(words[i+1], 
 						i+2<words.length? words[i+2] : words[i+1])) && check(arr) && isValid(arr)) {
-					ret.add(sentence(arr));
-					idx = i+1;
+					String[] finalArr = arr;
+					int finalI = i+1;
+					int threshold = (arr.length >= 13)? 0 : 2;
+					for (int j = Math.min(i+threshold, words.length-1); j > i; j--) {
+						String[] ar = new String[arr.length + j - i];
+						for (int id = 0; id < arr.length; id++) {
+							ar[id] = arr[id];
+						}
+						for (int id = arr.length; id < ar.length; id++) {
+							ar[id] = words[i + id - arr.length + 1];
+						}
+						if (j != words.length - 2 && (j+1>=words.length? true : check(words[j+1], 
+								j+2<words.length? words[j+2] : words[j+1])) && check(ar) && isValid(ar)) {
+							finalArr = ar;
+							finalI = j+1;
+							break;
+						}
+					}
+					ret.add(sentence(finalArr));
+					idx = finalI;
 					valid = true;
 					break;
 				}
@@ -122,7 +141,7 @@ public class Segment {
 			} catch (Exception e) {
 				subs = new ArrayList<>();
 			}
-			if (subs.contains("v") || subs.contains("v-d")) {
+			if (!subs.contains("a") && (subs.contains("v") || subs.contains("v-d"))) {
 				containsVerb = true;
 			}
 		}
@@ -130,8 +149,21 @@ public class Segment {
 	}
 	
 	private static boolean check(String[] input) {
+		if (contains(input, ",") && input.length < 6) return false;
 		if (input.length <= 1) return false;
 		int comma = idx(input, ",");
+		if (comma == -1) comma = idx(input, "how");
+		if (dict.getSubscript(input[input.length - 1]).contains("r")) return false;
+		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
+				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
+						|| dict.getSubscript(input[0]).contains("p")))
+			return false;
+		String last = input[input.length - 1].toLowerCase().trim();
+		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
+				&& !dict.getSubscript(last).contains("r") 
+				&& !dict.getSubscript(last).contains("a") 
+				&& !dict.getSubscript(last).contains("n-u"))))
+			return false;
 		if (comma != -1) {
 			String[] in = new String[input.length - comma];
 			for (int i = comma + 1; i < input.length;  i++) {
@@ -174,6 +206,7 @@ public class Segment {
 
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
+		if (first.equals("of") || second.equals(",")) return false;
 		second = second.toLowerCase();
 		List<String> subs;
 		try {
@@ -182,6 +215,7 @@ public class Segment {
 			subs = dict.getSubscript(first.substring(0,1).toUpperCase() + first.substring(1));
 		}
 		if (subs.size() == 1 && subs.contains("a")) return false;
+		if (subs.contains("r") && !(subs.size() == 2 && subs.contains("#their"))) return false;
 		if (subs.contains("v") || subs.contains("v-d") && !subs.contains("n") && !subs.contains("n-u")) {
 			return false;
 		}
@@ -189,25 +223,9 @@ public class Segment {
 	}
 
 	private static boolean isValid(String[] input) {
-		if (idx(input, "A") != -1 && idx(input, "A") != 0)
-			return false;
-		if (contains(input, ",") && input.length < 6) return false;
-		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
-				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
-						|| dict.getSubscript(input[0]).contains("p")))
-			return false;
 		for (int i = 0; i < input.length; i++) {
-			if (!input[i].equals("A")) {
-				input[i] = input[i].toLowerCase().trim();
-			}
+			input[i] = input[i].toLowerCase().trim();
 		}
-		String last = input[input.length - 1].toLowerCase().trim();
-		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
-				&& !dict.getSubscript(last).contains("r") 
-				&& !dict.getSubscript(last).contains("a") 
-				&& !dict.getSubscript(last).contains("w") 
-				&& !dict.getSubscript(last).contains("n-u"))))
-			return false;
 		outer: for (int i = 0; i < input.length - 1; i++) {
 			String left = input[i];
 			String right = input[i + 1];
@@ -217,27 +235,7 @@ public class Segment {
 			right = right.toLowerCase();
 			if (dict.getRule(left).isEmpty()) left = left.substring(0,1).toUpperCase() + left.substring(1);
 			if (dict.getRule(right).isEmpty()) right = right.substring(0,1).toUpperCase() + right.substring(1);
-			if ((dict.getRule(left).get(0).toString().equals(dict.getRule("sawed").get(0).toString())
-					|| (dict.getRule(left).get(0).toString().equals(dict.getRule("writes").get(0).toString()) 
-							&& contains(input, "to")) || left.equals("saw")) && (idx(input, "with") == i + 2 
-							|| idx(input, "with") == i + 3)) {
-				int idx = idx(input, "with");
-				if (idx == i + 2) {
-					i = idx - 1;
-					if (connectsLeft(left, right, input[i + 1]))
-						continue outer;
-				} else {
-					i = idx - 1;
-					if (right.equals("to")) {
-						if (connectsLeft(left, right, input[i + 1]) && connects(right, input[i]))
-							continue outer;
-					} else if (right.equals("the")) {
-						if (connects(left, input[i]) && connects(right, input[i]) && connects(left, input[i + 1]))
-							continue outer;
-					}
-				}
-			} else if (left.equals("been") && right.equals("a")) continue outer;
-			  else if (left.equals("in")) {
+			if ((left.equals("in") || left.equals("by")) && !dict.getSubscript(input[input.length - 1]).contains("a")) {
 				if (connects(left, input[input.length - 1])) continue outer;
 			} else if (left.equals("on") && right.equals("the") && i + 2 < input.length) {
 				i++;
@@ -264,6 +262,7 @@ public class Segment {
 					if (v) continue outer;
 				}
 			} else if (right.equals("a") || right.equals("the") && !left.equals("has") && i + 2 < input.length) {
+				if (dict.getSubscript(input[i+2]).contains("a") && i+3>=input.length) return false;
 				i++;
 				if (input[i+1].toLowerCase().equals("cordelia") || input[i+1].toLowerCase().equals("smile")) {
 					if (connects(left, input[i+1]) && connects(right, input[i+1])) continue outer;
@@ -1106,7 +1105,8 @@ public class Segment {
 					it.remove();
 			}
 			List<String> words = new ArrayList<>();
-			for (String sentence : sentences) {
+			for (int i = 0; i < 10; i++) {
+				String sentence = sentences.get(i);
 				String[] w = sentence.split(" ");
 				w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
 				for (String word: w) {
@@ -1135,14 +1135,5 @@ public class Segment {
 				return i;
 		}
 		return -1;
-	}
-
-	private static String makeSentence(String[] arr) {
-		String ret = "";
-		for (int i = 0; i < arr.length - 1; i++) {
-			ret += arr[i] + " ";
-		}
-		ret += arr[arr.length - 1] + ".";
-		return ret;
 	}
 }
