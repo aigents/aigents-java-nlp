@@ -41,7 +41,6 @@ public class Segment {
 	public static Dictionary dict, hyphenated;
 
 	public static void main(String[] args) throws IOException {
-		args = new String[] {"en/4.0.dict", "gutenberg544.txt"};
 		if (args.length > 2) {
 			try {
 				if (args[0].contains("/4.0.dict")) {
