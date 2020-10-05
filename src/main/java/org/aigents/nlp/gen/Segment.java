@@ -39,6 +39,7 @@ import main.java.org.aigents.nlp.lg.Rule;
 
 public class Segment {
 	public static Dictionary dict, hyphenated;
+	public static List<String> groundTruth = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
 		if (args.length > 2) {
@@ -54,7 +55,7 @@ public class Segment {
 				for (int i = 1; i < args.length; i++) {
 					words[i - 1] = args[i];
 				}
-				System.out.println(display(words) + ": " + segment(words));
+				System.out.println(display(words) + ": " + segment(words)); 
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
@@ -77,13 +78,50 @@ public class Segment {
 				for (int i = 0; i < w.size(); i++) {
 					words[i] = w.get(i);
 				}
-				System.out.println(display(words) + ": " + segment(words)); 
+				run(words);
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
 		} else {
 			System.out.println("Invalid or nonexistent command line parameters. Include [path/to/dict] followed by the sentence.");
 		}
+	}
+	
+	private static void run(String[] words) {
+		List<String> ret = segment(words);
+		System.out.println(display(words) + ": " + ret); 
+		System.out.println("-----GROUND TRUTH-----");
+		System.out.println("   Total number of sentences: " + groundTruth.size());
+		double avg = 0;
+		for (String s : groundTruth) {
+			avg += s.split(" ").length;
+		}
+		avg /= groundTruth.size();
+		System.out.println("   Average sentence length (number of words and commas): " + avg);
+		System.out.println("-----NLS RESULTS-----");
+		System.out.println("   Total number of sentences: " + ret.size());
+		avg = 0;
+		for (String s : ret) {
+			avg += s.split(" ").length;
+		}
+		avg /= ret.size();
+		System.out.println("   Average sentence length, in words: " + avg);
+		int count = 0;
+		
+		for (String s : ret) {
+			s = s.replace(",", "");
+			s = s.replace("  ", " ");
+			s = s.replace(".", " ");
+			s = s.toLowerCase();
+			for (String s2 : groundTruth) {
+				s2 = s2.replace(",", "");
+				s2 = s2.replace("  ", " ");
+				s2 = s2.replace(".", " ");
+				s2 = s2.toLowerCase();
+				if (s.equals(s2)) count++;
+			}
+		}
+		System.out.println("Number of sentences matching exactly: " + count);
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -1211,6 +1249,7 @@ public class Segment {
 			List<String> words = new ArrayList<>();
 			for (int i = 0; i < 10; i++) {
 				String sentence = sentences.get(i);
+				groundTruth.add(sentence);
 				String[] w = sentence.split(" ");
 				w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
 				for (String word: w) {
