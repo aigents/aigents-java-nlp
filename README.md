@@ -36,9 +36,18 @@ The script above will create a `Dictionary` object given the dictionary path spe
 
 **Natural Language Generation (NLG)**
 
-To test `Generator.java`, choose one of the following two options:
+To test `Generator.java`, choose one of the following three options:
 
-**ONE:** To use the sentences provided in the file `poc_english.txt`, run
+**ONE:** To test on "Anne's House of Dreams" by Lucy Maud Montgomery (`gutenberg544.txt`), run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    java main.java.org.aigents.nlp.gen.Generator en/4.0.dict gutenberg544.txt
+    
+The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified in the second argument (`gutenberg544.txt` in the line above).
+
+**TWO:** To use the sentences provided in the file `poc_english.txt`, run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -47,7 +56,7 @@ To test `Generator.java`, choose one of the following two options:
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified in the second argument (`poc_english.txt` in the line above).
 
-**TWO:** To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
+**THREE:** To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
