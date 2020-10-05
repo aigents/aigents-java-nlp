@@ -32,6 +32,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Loader;
@@ -105,9 +107,32 @@ public class Segment {
 			avg += s.split(" ").length;
 		}
 		avg /= ret.size();
-		System.out.println("   Average sentence length, in words: " + avg);
+		System.out.println("   Average sentence length, in words and commas: " + avg);
+		List<String> boundaries = new ArrayList<>();
+		for (int i = 0; i < groundTruth.size() - 1; i++) {
+			String s = groundTruth.get(i);
+			String s2 = groundTruth.get(i+1);
+			String[] sArr = s.split(" ");
+			String[] s2Arr = s2.split(" ");
+			String boundary = sArr[sArr.length - 1].toLowerCase().substring(0, sArr[sArr.length - 1].length() - 1) 
+					+ " " + s2Arr[0].toLowerCase();
+			boundaries.add(boundary);
+		}
+		List<String> boundaries2 = new ArrayList<>();
+		for (int i = 0; i < ret.size() - 1; i++) {
+			String s = ret.get(i);
+			String s2 = ret.get(i+1);
+			String[] sArr = s.split(" ");
+			String[] s2Arr = s2.split(" ");
+			String boundary = sArr[sArr.length - 1].toLowerCase().substring(0, sArr[sArr.length - 1].length() - 1) 
+					+ " " + s2Arr[0].toLowerCase();
+			boundaries2.add(boundary);
+		}
+		Set<String> result = boundaries.stream()
+				  .distinct()
+				  .filter(boundaries2::contains)
+				  .collect(Collectors.toSet());
 		int count = 0;
-		
 		for (String s : ret) {
 			s = s.replace(",", "");
 			s = s.replace("  ", " ");
@@ -122,6 +147,7 @@ public class Segment {
 			}
 		}
 		System.out.println("Number of sentences matching exactly: " + count);
+		System.out.println("Number of sentence boundaries accurately identified: " + result.size() + "/" + boundaries.size());
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -135,10 +161,10 @@ public class Segment {
 					arr[a-idx] = words[a];
 				}
 				if (i != words.length - 2 && (i+1>=words.length? true : check(words[i+1], 
-						i+2<words.length? words[i+2] : words[i+1])) && check(arr) && isValid(arr)) {
+						i+2<words.length? words[i+2] : words[i+1])) && check(arr) && isValid(arr) && valid(words, i+1)) {
 					String[] finalArr = arr;
 					int finalI = i+1;
-					int threshold = (arr.length >= 13)? 0 : 2;
+					int threshold = (arr.length >= 13)? 0 : (i+3<words.length && dict.getSubscript(words[i+3]).contains("j-ru"))? 7 : 2;
 					for (int j = Math.min(i+threshold, words.length-1); j > i; j--) {
 						String[] ar = new String[arr.length + j - i];
 						for (int id = 0; id < arr.length; id++) {
@@ -169,6 +195,16 @@ public class Segment {
 		return ret;
 	}
 	
+	private static boolean valid(String[] words, int index) {
+		int len = Math.min(10, words.length - index);
+		String[] w = new String[len];
+		for (int i = index; i < index + len; i++) {
+			w[i - index] = words[i];
+		}
+		if (w.length == 0) return true;
+		return containsVerb(w);
+	}
+	
 	private static boolean containsVerb(String[] input) {
 		boolean containsVerb = false;
 		for (String word : input) {
@@ -178,7 +214,7 @@ public class Segment {
 			} catch (Exception e) {
 				subs = new ArrayList<>();
 			}
-			if (!subs.contains("a") && (subs.contains("v") || subs.contains("v-d"))) {
+			if (!subs.contains("a") && !subs.contains("n") && !subs.contains("n-u") && (subs.contains("v") || subs.contains("v-d"))) {
 				containsVerb = true;
 			}
 		}
@@ -198,9 +234,11 @@ public class Segment {
 		String last = input[input.length - 1].toLowerCase().trim();
 		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
 				&& !dict.getSubscript(last).contains("r") 
+				&& !last.equals("be")
 				&& !dict.getSubscript(last).contains("a") 
 				&& !dict.getSubscript(last).contains("n-u"))))
 			return false;
+		if (dict.getSubscript(last).contains("e")) return false;
 		if (comma != -1) {
 			String[] in = new String[input.length - comma];
 			for (int i = comma + 1; i < input.length;  i++) {
@@ -243,7 +281,7 @@ public class Segment {
 
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
-		if (first.equals("of") || second.equals(",")) return false;
+		if (first.equals("of")) return false;
 		second = second.toLowerCase();
 		List<String> subs;
 		try {
@@ -251,6 +289,7 @@ public class Segment {
 		} catch (Exception e) {
 			subs = dict.getSubscript(first.substring(0,1).toUpperCase() + first.substring(1));
 		}
+		if ((!subs.contains("ij") && second.equals(","))) return false;
 		if (subs.size() == 1 && subs.contains("a")) return false;
 		if (subs.contains("r") && !(subs.size() == 2 && subs.contains("#their"))) return false;
 		if ((subs.contains("v") || subs.contains("v-d")) && !subs.contains("n") && !subs.contains("n-u")) {
