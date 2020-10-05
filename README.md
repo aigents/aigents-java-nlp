@@ -71,6 +71,8 @@ To test `SmallGrammarGen.java`, follow the same steps as with `Generator.java`, 
 
     java main.java.org.aigents.nlp.gen.SmallGrammarGen dict_30C_2018-12-31_0006.4.0.dict <individual words or poc_english.txt>
 
+**Loader - Utility for NLS and NLG**
+
 To test `Loader.java`, run 
 
     cd src
