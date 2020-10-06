@@ -30,10 +30,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Loader;
@@ -72,7 +72,7 @@ public class Segment {
 				}
 				List<String> w = new ArrayList<>();
 				try {
-					w = processSentences("gutenberg544.txt");
+					w = processSentences(args[1]);
 				} catch (Exception e) {
 					System.err.println("Invalid filename: unable to locate and retrieve text to segment.");
 				}
@@ -90,7 +90,12 @@ public class Segment {
 	}
 	
 	private static void run(String[] words) {
+		long start = System.currentTimeMillis();
 		List<String> ret = segment(words);
+		long end = System.currentTimeMillis();
+		long runtime = end - start;
+		String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
+				TimeUnit.MILLISECONDS.toSeconds(runtime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
 		System.out.println(display(words) + ": " + ret); 
 		System.out.println("-----GROUND TRUTH-----");
 		System.out.println("   Total number of sentences: " + groundTruth.size());
@@ -128,10 +133,12 @@ public class Segment {
 					+ " " + s2Arr[0].toLowerCase();
 			boundaries2.add(boundary);
 		}
-		Set<String> result = boundaries.stream()
-				  .distinct()
-				  .filter(boundaries2::contains)
-				  .collect(Collectors.toSet());
+		List<String> result = new ArrayList<>();
+		for (String b : boundaries) {
+			if (boundaries2.contains(b)) {
+				result.add(b);
+			}
+		}
 		int count = 0;
 		for (String s : ret) {
 			s = s.replace(",", "");
@@ -146,8 +153,11 @@ public class Segment {
 				if (s.equals(s2)) count++;
 			}
 		}
-		System.out.println("Number of sentences matching exactly: " + count);
-		System.out.println("Number of sentence boundaries accurately identified: " + result.size() + "/" + boundaries.size());
+		System.out.println("-----OVERALL STATISTICS-----");
+		System.out.println("   Runtime: " + t);
+		System.out.println("   Number of sentences matching exactly: " + count);
+		System.out.println("   Number of sentence boundaries accurately identified: " + result.size() + "/" + boundaries.size());
+		System.out.println("   Accuracy of boundary identification: " + ((double) result.size())/boundaries.size());
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -214,7 +224,8 @@ public class Segment {
 			} catch (Exception e) {
 				subs = new ArrayList<>();
 			}
-			if (!subs.contains("a") && !subs.contains("n") && !subs.contains("n-u") && (subs.contains("v") || subs.contains("v-d"))) {
+			if ((!subs.contains("a") && subs.contains("v-d")) || (!subs.contains("a") && !subs.contains("n") 
+					&& !subs.contains("n-u") && subs.contains("v"))) {
 				containsVerb = true;
 			}
 		}
@@ -226,13 +237,16 @@ public class Segment {
 		if (input.length <= 1) return false;
 		int comma = idx(input, ",");
 		if (comma == -1) comma = idx(input, "how");
-		if (dict.getSubscript(input[input.length - 1]).contains("r")) return false;
+		if (dict.getSubscript(input[input.length - 1]).contains("r") && !dict.getSubscript(input[input.length - 1]).contains("i")) return false;
 		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
 				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
 						|| dict.getSubscript(input[0]).contains("p")))
 			return false;
 		String last = input[input.length - 1].toLowerCase().trim();
-		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
+		if ((dict.getSubscript(last).isEmpty() 
+				&& dict.getSubscript(last.substring(0,1).toUpperCase() + last.substring(1)).isEmpty() 
+				&& !Arrays.asList("before","other","ones").contains(last))
+				|| (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
 				&& !dict.getSubscript(last).contains("r") 
 				&& !last.equals("be")
 				&& !dict.getSubscript(last).contains("a") 
@@ -260,7 +274,8 @@ public class Segment {
 			if (subs.isEmpty()) {
 				subs = dict.getSubscript(word.substring(0,1).toUpperCase() + word.substring(1));
 			}
-			if (subs.size() == 1 && (subs.contains("m") || subs.contains("l") || subs.contains("f"))) {
+			if (subs.size() == 1 && (subs.contains("m") || subs.contains("l") || subs.contains("f")) 
+					&& !(ret.split(" ")[ret.split(" ").length-1].equals("a"))) {
 				word = word.substring(0,1).toUpperCase() + word.substring(1);
 			}
 			if (word.equals(",")) ret = ret.substring(0, ret.length() - 1);
@@ -281,7 +296,7 @@ public class Segment {
 
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
-		if (first.equals("of")) return false;
+		if (Arrays.asList("of", "with", "on", "before").contains(first)) return false;
 		second = second.toLowerCase();
 		List<String> subs;
 		try {
@@ -340,7 +355,7 @@ public class Segment {
 					if (v) continue outer;
 				}
 			} else if (right.equals("a") || right.equals("the") && !left.equals("has") && i + 2 < input.length) {
-				if (dict.getSubscript(input[i+2]).contains("a") && i+3>=input.length) return false;
+				if (dict.getSubscript(input[i+2]).contains("a") && !dict.getSubscript(input[i+2]).contains("n") && i+3>=input.length) return false;
 				i++;
 				if (input[i+1].toLowerCase().equals("cordelia") || input[i+1].toLowerCase().equals("smile")) {
 					if (connects(left, input[i+1]) && connects(right, input[i+1])) continue outer;
@@ -352,6 +367,8 @@ public class Segment {
 			} else if (right.equals("before") && i - 2 >= 0) {
 				if (connects(input[i - 2], right))
 					continue outer;
+			} else if (right.equals("now") && i+2 < input.length && left.equals(input[i+2])) {
+				return false;
 			} else {
 				if (connects(left, right)) {
 					continue outer;
@@ -1286,7 +1303,7 @@ public class Segment {
 					it.remove();
 			}
 			List<String> words = new ArrayList<>();
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < (path.startsWith("gut")? 10 : sentences.size()); i++) {
 				String sentence = sentences.get(i);
 				groundTruth.add(sentence);
 				String[] w = sentence.split(" ");
