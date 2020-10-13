@@ -40,4 +40,4 @@ To test `Loader.java`, run
     javac main/java/org/aigents/nlp/lg/*.java
     java main.java.org.aigents.nlp.lg.Loader en/4.0.dict board
     
-The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above) given the dictionary path specified in the first argument (`en/4.0.dict` in the line above). To test with the Russian dictionary, use `ru/4.0.dict` for the first argument. To test with a small grammar dictionary, use `poc-english_5C_2018-06-06_0004.4.0.dict.txt` for the first argument.
+The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above) given the dictionary path specified in the first argument (`en/4.0.dict` in the line above).
