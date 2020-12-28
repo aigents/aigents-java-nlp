@@ -47,6 +47,7 @@ public class Generator {
 	public static boolean tooMuch = false;
 
 	public static void main(String[] args) throws IOException {
+		args = new String[] {"en/4.0.dict", "gutenberg544.txt"};
 		long startTime = System.currentTimeMillis();
 		if (args.length == 2) {
 			int single = 0;
@@ -445,7 +446,6 @@ public class Generator {
 		outer: for (int i = 0; i < input.length - 1; i++) {
 			String left = input[i];
 			String right = input[i + 1];
-			System.out.println(left + ", " + right);
 			if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
 				return false;
 			left = left.toLowerCase();
@@ -1381,9 +1381,9 @@ public class Generator {
 		try {
 			Path p;
 			if (System.getProperty("user.dir").endsWith("src")) {
-				p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+				p = Paths.get(Paths.get("test/resources/" + path).toAbsolutePath().toString());
 			} else {
-				p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+				p = Paths.get(Paths.get("src/test/resources/" + path).toAbsolutePath().toString());
 			}
 			File f = p.toFile();
 			List<String> sentences = Files.readAllLines(f.toPath());
@@ -1419,9 +1419,9 @@ public class Generator {
 				}
 			} else {
 				if (System.getProperty("user.dir").endsWith("src")) {
-					p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+					p = Paths.get(Paths.get("test/resources/" + path).toAbsolutePath().toString());
 				} else {
-					p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+					p = Paths.get(Paths.get("src/test/resources/" + path).toAbsolutePath().toString());
 				}
 			}
 			File f = p.toFile();
