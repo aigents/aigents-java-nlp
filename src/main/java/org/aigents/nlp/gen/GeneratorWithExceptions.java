@@ -1470,9 +1470,9 @@ public class GeneratorWithExceptions {
 		try {
 			Path p;
 			if (System.getProperty("user.dir").endsWith("src")) {
-				p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+				p = Paths.get(Paths.get("test/resources/" + path).toAbsolutePath().toString());
 			} else {
-				p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+				p = Paths.get(Paths.get("src/test/resources/" + path).toAbsolutePath().toString());
 			}
 			File f = p.toFile();
 			List<String> sentences = Files.readAllLines(f.toPath());
@@ -1508,9 +1508,9 @@ public class GeneratorWithExceptions {
 				}
 			} else {
 				if (System.getProperty("user.dir").endsWith("src")) {
-					p = Paths.get(Paths.get("test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+					p = Paths.get(Paths.get("test/resources/" + path).toAbsolutePath().toString());
 				} else {
-					p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/gen/" + path).toAbsolutePath().toString());
+					p = Paths.get(Paths.get("src/test/resources/" + path).toAbsolutePath().toString());
 				}
 			}
 			File f = p.toFile();

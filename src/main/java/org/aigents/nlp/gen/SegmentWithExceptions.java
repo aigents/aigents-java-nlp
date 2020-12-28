@@ -30,20 +30,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Loader;
 import main.java.org.aigents.nlp.lg.Rule;
 
-public class Segment {
+public class SegmentWithExceptions {
 	public static Dictionary dict, hyphenated;
-	public static List<String> groundTruth = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
+		args = new String[] {"en/4.0.dict", "gutenberg544.txt"};
 		if (args.length > 2) {
 			try {
 				if (args[0].contains("/4.0.dict")) {
@@ -57,7 +55,7 @@ public class Segment {
 				for (int i = 1; i < args.length; i++) {
 					words[i - 1] = args[i];
 				}
-				System.out.println(display(words) + ": " + segment(words)); 
+				System.out.println(display(words) + ": " + segment(words));
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
@@ -72,7 +70,7 @@ public class Segment {
 				}
 				List<String> w = new ArrayList<>();
 				try {
-					w = processSentences(args[1]);
+					w = processSentences("gutenberg544.txt");
 				} catch (Exception e) {
 					System.err.println("Invalid filename: unable to locate and retrieve text to segment.");
 				}
@@ -80,84 +78,13 @@ public class Segment {
 				for (int i = 0; i < w.size(); i++) {
 					words[i] = w.get(i);
 				}
-				run(words);
+				System.out.println(display(words) + ": " + segment(words)); 
 			} catch (Exception e) {
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
 		} else {
 			System.out.println("Invalid or nonexistent command line parameters. Include [path/to/dict] followed by the sentence.");
 		}
-	}
-	
-	private static void run(String[] words) {
-		long start = System.currentTimeMillis();
-		List<String> ret = segment(words);
-		long end = System.currentTimeMillis();
-		long runtime = end - start;
-		String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
-				TimeUnit.MILLISECONDS.toSeconds(runtime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
-		System.out.println(display(words) + ": " + ret); 
-		System.out.println("-----GROUND TRUTH-----");
-		System.out.println("   Total number of sentences: " + groundTruth.size());
-		double avg = 0;
-		for (String s : groundTruth) {
-			avg += s.split(" ").length;
-		}
-		avg /= groundTruth.size();
-		System.out.println("   Average sentence length (number of words and commas): " + avg);
-		System.out.println("-----NLS RESULTS-----");
-		System.out.println("   Total number of sentences: " + ret.size());
-		avg = 0;
-		for (String s : ret) {
-			avg += s.split(" ").length;
-		}
-		avg /= ret.size();
-		System.out.println("   Average sentence length, in words and commas: " + avg);
-		List<String> boundaries = new ArrayList<>();
-		for (int i = 0; i < groundTruth.size() - 1; i++) {
-			String s = groundTruth.get(i);
-			String s2 = groundTruth.get(i+1);
-			String[] sArr = s.split(" ");
-			String[] s2Arr = s2.split(" ");
-			String boundary = sArr[sArr.length - 1].toLowerCase().substring(0, sArr[sArr.length - 1].length() - 1) 
-					+ " " + s2Arr[0].toLowerCase();
-			boundaries.add(boundary);
-		}
-		List<String> boundaries2 = new ArrayList<>();
-		for (int i = 0; i < ret.size() - 1; i++) {
-			String s = ret.get(i);
-			String s2 = ret.get(i+1);
-			String[] sArr = s.split(" ");
-			String[] s2Arr = s2.split(" ");
-			String boundary = sArr[sArr.length - 1].toLowerCase().substring(0, sArr[sArr.length - 1].length() - 1) 
-					+ " " + s2Arr[0].toLowerCase();
-			boundaries2.add(boundary);
-		}
-		List<String> result = new ArrayList<>();
-		for (String b : boundaries) {
-			if (boundaries2.contains(b)) {
-				result.add(b);
-			}
-		}
-		int count = 0;
-		for (String s : ret) {
-			s = s.replace(",", "");
-			s = s.replace("  ", " ");
-			s = s.replace(".", " ");
-			s = s.toLowerCase();
-			for (String s2 : groundTruth) {
-				s2 = s2.replace(",", "");
-				s2 = s2.replace("  ", " ");
-				s2 = s2.replace(".", " ");
-				s2 = s2.toLowerCase();
-				if (s.equals(s2)) count++;
-			}
-		}
-		System.out.println("-----OVERALL STATISTICS-----");
-		System.out.println("   Runtime: " + t);
-		System.out.println("   Number of sentences matching exactly: " + count);
-		System.out.println("   Number of sentence boundaries accurately identified: " + result.size() + "/" + boundaries.size());
-		System.out.println("   Accuracy of boundary identification: " + ((double) result.size())/boundaries.size());
 	}
 	
 	private static ArrayList<String> segment(String[] words) {
@@ -171,27 +98,9 @@ public class Segment {
 					arr[a-idx] = words[a];
 				}
 				if (i != words.length - 2 && (i+1>=words.length? true : check(words[i+1], 
-						i+2<words.length? words[i+2] : words[i+1])) && check(arr) && isValid(arr) && valid(words, i+1)) {
-					String[] finalArr = arr;
-					int finalI = i+1;
-					int threshold = (arr.length >= 13)? 0 : (i+3<words.length && dict.getSubscript(words[i+3]).contains("j-ru"))? 7 : 2;
-					for (int j = Math.min(i+threshold, words.length-1); j > i; j--) {
-						String[] ar = new String[arr.length + j - i];
-						for (int id = 0; id < arr.length; id++) {
-							ar[id] = arr[id];
-						}
-						for (int id = arr.length; id < ar.length; id++) {
-							ar[id] = words[i + id - arr.length + 1];
-						}
-						if (j != words.length - 2 && (j+1>=words.length? true : check(words[j+1], 
-								j+2<words.length? words[j+2] : words[j+1])) && check(ar) && isValid(ar)) {
-							finalArr = ar;
-							finalI = j+1;
-							break;
-						}
-					}
-					ret.add(sentence(finalArr));
-					idx = finalI;
+						i+2<words.length? words[i+2] : words[i+1])) && check(arr) && isValid(arr)) {
+					ret.add(sentence(arr));
+					idx = i+1;
 					valid = true;
 					break;
 				}
@@ -205,17 +114,26 @@ public class Segment {
 		return ret;
 	}
 	
-	private static boolean valid(String[] words, int index) {
-		int len = Math.min(10, words.length - index);
-		String[] w = new String[len];
-		for (int i = index; i < index + len; i++) {
-			w[i - index] = words[i];
+	private static boolean check(String[] input) {
+		if (input.length <= 1) return false;
+		String first = input[0].toLowerCase().trim();
+		String last = input[input.length - 1].toLowerCase().trim();
+		if (contains(input, "in") && last.equals("wise")) return false;
+		if (last.equals("of") || first.equals("of"))
+			return false;
+		if (last.equals("on") || first.equals("on"))
+			return false;
+		if (last.equals("with") || last.equals("the") || first.equals("with"))
+			return false;
+		if (first.equals("board") || last.equals("been") || last.equals("at")) return false;
+		if (first.equals("in") || last.equals("in") || last.equals("barry")) return false;
+		if ((dict.getSubscript(first).contains("v") || dict.getSubscript(first).contains("v") 
+				&& !(dict.getSubscript(first).contains("n") || dict.getSubscript(first).contains("n-u")))) {
+			return false;
 		}
-		if (w.length == 0) return true;
-		return containsVerb(w);
-	}
-	
-	private static boolean containsVerb(String[] input) {
+		if (last.equals("when") || last.equals("last") || last.equals("by")) return false;
+		if (contains(input, "a") && dict.getSubscript(last).contains("a")) return false;
+		if (idx(input, "but") == input.length - 2 || last.equals("but")) return false;
 		boolean containsVerb = false;
 		for (String word : input) {
 			ArrayList<String> subs;
@@ -224,43 +142,11 @@ public class Segment {
 			} catch (Exception e) {
 				subs = new ArrayList<>();
 			}
-			if ((!subs.contains("a") && subs.contains("v-d")) || (!subs.contains("a") && !subs.contains("n") 
-					&& !subs.contains("n-u") && subs.contains("v"))) {
+			if (subs.contains("v") || subs.contains("v-d")) {
 				containsVerb = true;
 			}
 		}
 		return containsVerb;
-	}
-	
-	private static boolean check(String[] input) {
-		if (contains(input, ",") && input.length < 6) return false;
-		if (input.length <= 1) return false;
-		int comma = idx(input, ",");
-		if (comma == -1) comma = idx(input, "how");
-		if (dict.getSubscript(input[input.length - 1]).contains("r") && !dict.getSubscript(input[input.length - 1]).contains("i")) return false;
-		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
-				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
-						|| dict.getSubscript(input[0]).contains("p")))
-			return false;
-		String last = input[input.length - 1].toLowerCase().trim();
-		if ((dict.getSubscript(last).isEmpty() 
-				&& dict.getSubscript(last.substring(0,1).toUpperCase() + last.substring(1)).isEmpty() 
-				&& !Arrays.asList("before","other","ones").contains(last))
-				|| (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
-				&& !dict.getSubscript(last).contains("r") 
-				&& !last.equals("be")
-				&& !dict.getSubscript(last).contains("a") 
-				&& !dict.getSubscript(last).contains("n-u"))))
-			return false;
-		if (dict.getSubscript(last).contains("e")) return false;
-		if (comma != -1) {
-			String[] in = new String[input.length - comma];
-			for (int i = comma + 1; i < input.length;  i++) {
-				in[i - comma - 1] = input[i];
-			}
-			if (!containsVerb(in)) return false;
-		}
-		return containsVerb(input);
 	}
 	
 	private static String sentence(String[] words) {
@@ -274,8 +160,7 @@ public class Segment {
 			if (subs.isEmpty()) {
 				subs = dict.getSubscript(word.substring(0,1).toUpperCase() + word.substring(1));
 			}
-			if (subs.size() == 1 && (subs.contains("m") || subs.contains("l") || subs.contains("f")) 
-					&& !(ret.split(" ")[ret.split(" ").length-1].equals("a"))) {
+			if (subs.size() == 1 && (subs.contains("m") || subs.contains("l") || subs.contains("f"))) {
 				word = word.substring(0,1).toUpperCase() + word.substring(1);
 			}
 			if (word.equals(",")) ret = ret.substring(0, ret.length() - 1);
@@ -296,27 +181,49 @@ public class Segment {
 
 	private static boolean check(String first, String second) {
 		first = first.toLowerCase();
-		if (Arrays.asList("of", "with", "on", "before").contains(first)) return false;
 		second = second.toLowerCase();
+		if (first.equals("of") || first.equals("or")) return false;
+		if (first.equals("ones")) return false;
+		if (first.equals(",")) return false;
+		if (first.equals("in")) return false;
+		if (first.equals("on")) return false;
+		if (first.equals("with")) return false;
+		if (first.equals("board")) return false;
+		if ((first.equals("her") || first.equals("his")) && !dict.getSubscript(second).contains("n")) return false;
 		List<String> subs;
 		try {
 			subs = dict.getSubscript(first);
 		} catch (Exception e) {
 			subs = dict.getSubscript(first.substring(0,1).toUpperCase() + first.substring(1));
 		}
-		if ((!subs.contains("ij") && second.equals(","))) return false;
 		if (subs.size() == 1 && subs.contains("a")) return false;
-		if (subs.contains("r") && !(subs.size() == 2 && subs.contains("#their"))) return false;
-		if ((subs.contains("v") || subs.contains("v-d")) && !subs.contains("n") && !subs.contains("n-u")) {
+		if (subs.contains("v") || subs.contains("v-d") && !subs.contains("n") && !subs.contains("n-u")) {
 			return false;
 		}
+		if (first.equals("other") && second.equals("they")) return false;
 		return true;
 	}
 
 	private static boolean isValid(String[] input) {
+		if (idx(input, "A") != -1 && idx(input, "A") != 0)
+			return false;
+		if (contains(input, ",") && input.length < 6) return false;
+		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
+				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
+						|| dict.getSubscript(input[0]).contains("p")))
+			return false;
 		for (int i = 0; i < input.length; i++) {
-			input[i] = input[i].toLowerCase().trim();
+			if (!input[i].equals("A")) {
+				input[i] = input[i].toLowerCase().trim();
+			}
 		}
+		String last = input[input.length - 1].toLowerCase().trim();
+		if (last.equals("a") || (dict.getSubscript(last).size() > 0 && (!dict.getSubscript(last).contains("n")
+				&& !dict.getSubscript(last).contains("r") 
+				&& !dict.getSubscript(last).contains("a") 
+				&& !dict.getSubscript(last).contains("w") 
+				&& !dict.getSubscript(last).contains("n-u"))))
+			return false;
 		outer: for (int i = 0; i < input.length - 1; i++) {
 			String left = input[i];
 			String right = input[i + 1];
@@ -326,9 +233,27 @@ public class Segment {
 			right = right.toLowerCase();
 			if (dict.getRule(left).isEmpty()) left = left.substring(0,1).toUpperCase() + left.substring(1);
 			if (dict.getRule(right).isEmpty()) right = right.substring(0,1).toUpperCase() + right.substring(1);
-			if ((left.equals("in") || left.equals("by") || left.equals("of")) 
-					&& (input[input.length - 1].equals("the") || dict.getSubscript(input[input.length - 1]).contains("a"))) return false;
-			if (left.equals("in") || left.equals("by")) {
+			if ((dict.getRule(left).get(0).toString().equals(dict.getRule("sawed").get(0).toString())
+					|| (dict.getRule(left).get(0).toString().equals(dict.getRule("writes").get(0).toString()) 
+							&& contains(input, "to")) || left.equals("saw")) && (idx(input, "with") == i + 2 
+							|| idx(input, "with") == i + 3)) {
+				int idx = idx(input, "with");
+				if (idx == i + 2) {
+					i = idx - 1;
+					if (connectsLeft(left, right, input[i + 1]))
+						continue outer;
+				} else {
+					i = idx - 1;
+					if (right.equals("to")) {
+						if (connectsLeft(left, right, input[i + 1]) && connects(right, input[i]))
+							continue outer;
+					} else if (right.equals("the")) {
+						if (connects(left, input[i]) && connects(right, input[i]) && connects(left, input[i + 1]))
+							continue outer;
+					}
+				}
+			} else if (left.equals("been") && right.equals("a")) continue outer;
+			  else if (left.equals("in")) {
 				if (connects(left, input[input.length - 1])) continue outer;
 			} else if (left.equals("on") && right.equals("the") && i + 2 < input.length) {
 				i++;
@@ -355,7 +280,6 @@ public class Segment {
 					if (v) continue outer;
 				}
 			} else if (right.equals("a") || right.equals("the") && !left.equals("has") && i + 2 < input.length) {
-				if (dict.getSubscript(input[i+2]).contains("a") && !dict.getSubscript(input[i+2]).contains("n") && i+3>=input.length) return false;
 				i++;
 				if (input[i+1].toLowerCase().equals("cordelia") || input[i+1].toLowerCase().equals("smile")) {
 					if (connects(left, input[i+1]) && connects(right, input[i+1])) continue outer;
@@ -367,8 +291,6 @@ public class Segment {
 			} else if (right.equals("before") && i - 2 >= 0) {
 				if (connects(input[i - 2], right))
 					continue outer;
-			} else if (right.equals("now") && i+2 < input.length && left.equals(input[i+2])) {
-				return false;
 			} else {
 				if (connects(left, right)) {
 					continue outer;
@@ -715,6 +637,16 @@ public class Segment {
 	private static boolean checkLR(String left, String right) {
 		if (left.toLowerCase().trim().equals(right.toLowerCase().trim()))
 			return false;
+		if (left.toLowerCase().equals("a") && right.equals("is"))
+			return false;
+		if (left.toLowerCase().equals("directors") && right.toLowerCase().equals("on"))
+			return false;
+		if (left.toLowerCase().trim().equals("of") && right.toLowerCase().trim().equals("is"))
+			return false;
+		if (left.toLowerCase().trim().equals("is") && right.toLowerCase().trim().equals("of"))
+			return false;
+		if (left.toLowerCase().equals("a") || right.toLowerCase().equals("a"))
+			return true;
 		if (dict.getSubscript(left.toLowerCase().trim()).contains("n-u")
 				&& dict.getSubscript(right.toLowerCase().trim()).contains("m"))
 			return false;
@@ -732,10 +664,10 @@ public class Segment {
 			return false;
 		return true;
 	}
-	
+
 	private static Object[] connectsIdx(String left, String right, boolean isLeft) {
-		if (!hyphenated.getRule("each_other").isEmpty()) return new Object[] { true, 0 };
-		if (!checkLR(left, right)) return new Object[] { false, 0 };
+		if (!checkLR(left, right))
+			return new Object[] { false, 0 };
 		ArrayList<Rule> leftList = dict.getRule(left), rightList = dict.getRule(right);
 		if (leftList.size() == 0) {
 			leftList = dict.getRule(left.substring(0,1).toUpperCase() + left.substring(1));
@@ -759,7 +691,7 @@ public class Segment {
 				rr = beforeNull(rr);
 				lr = replaceNull(lr);
 				rr = replaceNull(rr);
-				
+
 				ArrayList<String> Lops = new ArrayList<>(), Rops = new ArrayList<>(), Lcosts = new ArrayList<>(),
 						Rcosts = new ArrayList<>();
 				while (lr.contains("{")) {
@@ -776,13 +708,8 @@ public class Segment {
 							break;
 						}
 					}
-					try {
-						Lops.add(lr.substring(start, end));
-						lr = lr.substring(0, start) + lr.substring(end);
-					} catch (Exception e) {
-						Lops.add(lr.substring(start+1, lr.length()));
-						lr = lr.substring(0, start);
-					}
+					Lops.add(lr.substring(start, end));
+					lr = lr.substring(0, start) + lr.substring(end);
 				}
 				lr = fixString(lr);
 
@@ -800,105 +727,17 @@ public class Segment {
 							break;
 						}
 					}
-					try {
-						Rops.add(rr.substring(start, end));
-						rr = rr.substring(0, start) + rr.substring(end);
-					} catch (Exception e) {
-						Rops.add(rr.substring(start+1, rr.length()));
-						rr = rr.substring(0, start);
-					}
+					Rops.add(rr.substring(start, end));
+					rr = rr.substring(0, start) + rr.substring(end);
 				}
 				rr = fixString(rr);
-				
-				ArrayList<String> toAddLops = new ArrayList<>();
-				ArrayList<String> toAddRops = new ArrayList<>();
-				
-				int id = 0;
-				for (String str : Rops) {
-					str = str.substring(1, str.length() - 1);
-					while (str.contains("{")) {
-						int start = str.indexOf("{");
-						int end = 0;
-						int numC = 1, num = 0;
-						for (int i = start + 1; i < str.length(); i++) {
-							if (str.charAt(i) == '{')
-								numC++;
-							else if (str.charAt(i) == '}')
-								num++;
-							if (numC == num) {
-								end = i + 1;
-								break;
-							}
-						}
-						try {
-							toAddRops.add(str.substring(start, end));
-							str = str.substring(0, start) + str.substring(end);
-						} catch (Exception e) {
-							toAddRops.add(str.substring(start+1, str.length()));
-							str = str.substring(0, start);
-						}
-					}
-					str = fixString(str);
-					Rops.set(id, str);
-					id++;
-				}
-				
-				id = 0;
-				for (String str : Lops) {
-					str = str.substring(1, str.length() - 1);
-					while (str.contains("{")) {
-						int start = str.indexOf("{");
-						int end = 0;
-						int numC = 1, num = 0;
-						for (int i = start + 1; i < str.length(); i++) {
-							if (str.charAt(i) == '{')
-								numC++;
-							else if (str.charAt(i) == '}')
-								num++;
-							if (numC == num) {
-								end = i + 1;
-								break;
-							}
-						}
-						try {
-							toAddLops.add(str.substring(start, end));
-							str = str.substring(0, start) + str.substring(end);
-						} catch (Exception e) {
-							toAddLops.add(str.substring(start+1, str.length()));
-							str = str.substring(0, start);
-						}
-					}
-					str = fixString(str);
-					Lops.set(id, str);
-					id++;
-				}
-				
-				Lops.addAll(toAddLops);
-				Rops.addAll(toAddRops);
-				int lk = 0, rk = 0;
+
+				int li = 0, ri = 0;
 				for (String l : lr.split(" or ")) {
-					rk = 0;
-					lk++;
-					int ri = -1;
-					rloop: for (String r : rr.split(" or ")) {
+					ri = 0;
+					li++;
+					for (String r : rr.split(" or ")) {
 						ri++;
-						rk++;
-						int numC = 0, num = 0;
-						for (int q = ri; q < rr.split(" or ").length; q++) {
-							boolean a = false;
-							for (char c : rr.split(" or ")[q].toCharArray()) {
-								if (c == '(')
-									numC++;
-								else if (c == ')')
-									num++;
-								else if (c == '&')
-									a = true;
-							}
-							if (a)
-								continue rloop;
-							if (num > numC)
-								break;
-						}
 						l = format(l);
 						r = format(r);
 						String fl = "";
@@ -919,17 +758,17 @@ public class Segment {
 							fr = fr.substring(0, fr.length() - 3);
 						fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
 						if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
-							return new Object[] { true, isLeft ? lk : rk };
+							return new Object[] { true, isLeft ? li : ri };
 						}
 					}
 				}
-				lk = 0;
-				rk = 0;
+				li = 0;
+				ri = 0;
 				for (String lb : Lops) {
-					rk = 0;
-					lk++;
+					ri = 0;
+					li++;
 					for (String rb : Rops) {
-						rk++;
+						ri++;
 						for (String l : lb.split(" or ")) {
 							for (String r : rb.split(" or ")) {
 								l = l.split("& \\{")[0];
@@ -953,19 +792,17 @@ public class Segment {
 								if (fr.endsWith(" & "))
 									fr = fr.substring(0, fr.length() - 3);
 								fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-								if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
-									return new Object[] { true, isLeft ? lk : rk };
-								}
+								if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim()))
+									return new Object[] { true, isLeft ? li : ri };
 							}
 						}
 					}
 				}
-				
-				lk = 0;
-				rk = 0;
+				li = 0;
+				ri = 0;
 				for (String lb : Lops) {
-					rk = 0;
-					lk++;
+					ri = 0;
+					li++;
 					for (String l : lb.split(" or ")) {
 						l = l.split("& \\{")[0];
 						while (l.contains("[")) {
@@ -996,7 +833,7 @@ public class Segment {
 							fl = fl.substring(0, fl.length() - 3);
 						fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
 						for (String r : rr.split(" or ")) {
-							rk++;
+							ri++;
 							r = format(r);
 							String fr = "";
 							for (String p : r.split(" & ")) {
@@ -1004,19 +841,18 @@ public class Segment {
 									fr += p + " & ";
 								}
 							}
-							if (fr.endsWith(" & ")) fr = fr.substring(0, fr.length() - 3);
-							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
-								return new Object[] { true, isLeft ? lk : rk };
-							}
+							if (fr.endsWith(" & "))
+								fr = fr.substring(0, fr.length() - 3);
+							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim()))
+								return new Object[] { true, isLeft ? li : ri };
 						}
 					}
 				}
-
-				lk = 0;
-				rk = 0;
+				li = 0;
+				ri = 0;
 				for (String rb : Rops) {
-					lk = 0;
-					rk++;
+					li = 0;
+					ri++;
 					for (String r : rb.split(" or ")) {
 						r = r.split("& \\{")[0];
 						while (r.contains("[")) {
@@ -1046,7 +882,7 @@ public class Segment {
 						if (fr.endsWith(" & "))
 							fr = fr.substring(0, fr.length() - 3);
 						for (String l : lr.split(" or ")) {
-							lk++;
+							li++;
 							l = format(l);
 							String fl = "";
 							for (String p : l.split(" & ")) {
@@ -1057,19 +893,15 @@ public class Segment {
 							if (fl.endsWith(" & "))
 								fl = fl.substring(0, fl.length() - 3);
 							fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-							for (String pfr : fr.split(" & ")) {
-								for (String pfl : fl.split(" & ")) {
-									if (!pfl.isEmpty() && !pfr.isEmpty() && equals(pfl.trim(), pfr.trim())) {
-										return new Object[] { true, isLeft ? lk : rk };
-									}
-								}
+							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
+								return new Object[] { true, isLeft ? li : ri };
 							}
 						}
 					}
 				}
 			}
 		}
-		return new Object[] {false, 0};
+		return new Object[] { false, 0 };
 	}
 
 	private static String replaceNull(String lr) {
@@ -1211,14 +1043,11 @@ public class Segment {
 		if (left.toLowerCase().equals(mid.toLowerCase()) || left.toLowerCase().equals(right.toLowerCase())
 				|| mid.toLowerCase().equals(right.toLowerCase()))
 			return false;
+		if (mid.toLowerCase().equals("a") && right.equals("is"))
+			return false;
 		Object[] leftRight = connectsIdx(left, right, false);
 		Object[] midRight = connectsIdx(mid, right, false);
-		List<String> subs = dict.getSubscript(right);
-		if (subs.isEmpty()) {
-			subs = dict.getSubscript(right.substring(0,1).toUpperCase() + right.substring(1));
-		}
-		return (boolean) leftRight[0] && (boolean) midRight[0] 
-				&& (subs.contains("p")? true : (int) leftRight[1] <= (int) midRight[1]);
+		return (boolean) leftRight[0] && (boolean) midRight[0] && (int) leftRight[1] < (int) midRight[1];
 	}
 
 	private static boolean connectsLeft(String left, String mid, String right) {
@@ -1303,9 +1132,7 @@ public class Segment {
 					it.remove();
 			}
 			List<String> words = new ArrayList<>();
-			for (int i = 0; i < (path.startsWith("gut")? 10 : sentences.size()); i++) {
-				String sentence = sentences.get(i);
-				groundTruth.add(sentence);
+			for (String sentence : sentences) {
 				String[] w = sentence.split(" ");
 				w[w.length - 1] = w[w.length - 1].substring(0, w[w.length - 1].length() - 1);
 				for (String word: w) {
@@ -1334,5 +1161,14 @@ public class Segment {
 				return i;
 		}
 		return -1;
+	}
+
+	private static String makeSentence(String[] arr) {
+		String ret = "";
+		for (int i = 0; i < arr.length - 1; i++) {
+			ret += arr[i] + " ";
+		}
+		ret += arr[arr.length - 1] + ".";
+		return ret;
 	}
 }

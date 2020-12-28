@@ -27,9 +27,17 @@ Usage
 Natural Language Segmentation
 -----
 
-To test `Segment.java`, choose one of the following three options:
+To test `Segment.java`, choose one of the following four options:
 
-**ONE:** To test on "Anne's House of Dreams" by Lucy Maud Montgomery (`gutenberg544.txt`), run
+**ONE:** To execute a series of unit tests, run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    javac test/java/org/aigents/nlp/gen/*.java
+    java test.java.org.aigents.nlp.gen.TestSegment
+
+**TWO:** To test on "Anne's House of Dreams" by Lucy Maud Montgomery (`gutenberg544.txt`), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -38,7 +46,7 @@ To test `Segment.java`, choose one of the following three options:
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and segment the text given in the file with the path specified in the second argument (`gutenberg544.txt` in the line above).
 
-**TWO:** To test on SingularityNET's "small world" corpus (`poc_english.txt`), run
+**THREE:** To test on SingularityNET's "small world" corpus (`poc_english.txt`), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -47,7 +55,7 @@ The script above will create a `Dictionary` object given the dictionary path spe
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and segment the text given in the file with the path specified in the second argument (`poc_english.txt` in the line above).
 
-**THREE:** To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
+**FOUR:** To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -59,9 +67,17 @@ The script above will create a `Dictionary` object given the dictionary path spe
 Natural Language Generation
 -----------
 
-To test `Generator.java`, choose one of the following three options:
+To test `Generator.java`, choose one of the following four options:
 
-**ONE:** To test on "Anne's House of Dreams" by Lucy Maud Montgomery (`gutenberg544.txt`), run
+**ONE:** To execute a series of unit tests, run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    javac test/java/org/aigents/nlp/gen/*.java
+    java test.java.org.aigents.nlp.gen.TestGenerator
+
+**TWO:** To test on "Anne's House of Dreams" by Lucy Maud Montgomery (`gutenberg544.txt`), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -70,7 +86,7 @@ To test `Generator.java`, choose one of the following three options:
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified in the second argument (`gutenberg544.txt` in the line above).
 
-**TWO:** To use the sentences provided in the file `poc_english.txt`, run
+**THREE:** To use the sentences provided in the file `poc_english.txt`, run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -79,7 +95,7 @@ The script above will create a `Dictionary` object given the dictionary path spe
     
 The script above will create a `Dictionary` object given the dictionary path specified in the first argument (`en/4.0.dict` in the line above) and will then load, tokenize, and output the sentences given in the file with the path specified in the second argument (`poc_english.txt` in the line above).
 
-**THREE:** To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
+**FOUR:** To use custom words (must be part of the corpus `en/4.0.dict` for now, other languages may be added in future iterations), run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
@@ -91,14 +107,34 @@ The script above will create a `Dictionary` object given the dictionary path spe
 Small World NLG
 -----------
 
-To test `SmallGrammarGen.java`, follow the same steps as with `Generator.java`, but change the last line to
+To test `SmallGrammarGen.java`, choose one of the following two options:
+
+**ONE:** To execute a series of unit tests, run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    javac test/java/org/aigents/nlp/gen/*.java
+    java test.java.org.aigents.nlp.gen.SmallGrammarGen
+
+**TWO:** Follow the same steps as with `Generator.java`, but change the last line to
 
     java main.java.org.aigents.nlp.gen.SmallGrammarGen dict_30C_2018-12-31_0006.4.0.dict <individual words or poc_english.txt>
 
 Loader
 -----------
 
-Utility for NLS and NLG. To test `Loader.java`, run 
+Utility for NLS and NLG. To test `Loader.java`, choose one of the following two options:
+
+**ONE:** To execute a series of unit tests, run
+
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    javac test/java/org/aigents/nlp/gen/*.java
+    java test.java.org.aigents.nlp.gen.TestSegment
+
+**TWO**: Run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java
