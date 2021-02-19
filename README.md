@@ -11,6 +11,7 @@ Table of Contents
       * [Natural Language Generation](#natural-language-generation)
       * [Small World NLG](#small-world-nlg)
       * [Loader](#loader)
+   * [Citation](#citation)
 <!--te-->
 
 
@@ -141,3 +142,46 @@ Utility for NLS and NLG. To test `Loader.java`, choose one of the following two 
     java main.java.org.aigents.nlp.lg.Loader en/4.0.dict board
     
 The script above will output the rule and disjuncts associated with the word passed in as the second argument (`board` in the line above) given the dictionary path specified in the first argument (`en/4.0.dict` in the line above). To test with the Russian dictionary, use `ru/4.0.dict` for the first argument. To test with a small grammar dictionary, use `poc-english_5C_2018-06-06_0004.4.0.dict.txt` for the first argument.
+
+Citation
+=====
+
+Plain Text:
+
+V. Ramesh and A. Kolonin, "Interpretable Natural Language Segmentation Based on Link Grammar," 2020 Science and Artificial Intelligence conference (S.A.I.ence), Novosibirsk, Russia, 2020, pp. 25-32, doi: 10.1109/S.A.I.ence50533.2020.9303220.
+
+BibTeX:
+
+```
+@INPROCEEDINGS{9303220,
+  author={V. {Ramesh} and A. {Kolonin}},
+  booktitle={2020 Science and Artificial Intelligence conference (S.A.I.ence)}, 
+  title={Interpretable Natural Language Segmentation Based on Link Grammar}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={25-32},
+  doi={10.1109/S.A.I.ence50533.2020.9303220}}
+```
+
+RIS:
+
+```
+TY  - CONF
+TI  - Interpretable Natural Language Segmentation Based on Link Grammar
+T2  - 2020 Science and Artificial Intelligence conference (S.A.I.ence)
+SP  - 25
+EP  - 32
+AU  - V. Ramesh
+AU  - A. Kolonin
+PY  - 2020
+DO  - 10.1109/S.A.I.ence50533.2020.9303220
+JO  - 2020 Science and Artificial Intelligence conference (S.A.I.ence)
+IS  - 
+SN  - 
+VO  - 
+VL  - 
+JA  - 2020 Science and Artificial Intelligence conference (S.A.I.ence)
+Y1  - 14-15 Nov. 2020
+ER  - 
+```
