@@ -47,7 +47,6 @@ public class Generator {
 	public static boolean tooMuch = false;
 
 	public static void main(String[] args) throws IOException {
-		args = new String[] {"en/4.0.dict", "gutenberg544.txt"};
 		long startTime = System.currentTimeMillis();
 		if (args.length == 2) {
 			int single = 0;
