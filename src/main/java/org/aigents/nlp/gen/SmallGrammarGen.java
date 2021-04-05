@@ -46,7 +46,6 @@ public class SmallGrammarGen {
 	public static Dictionary dict, hyphenated;
 
 	public static void main(String[] args) throws IOException {
-		args = new String[] {"dict_30C_2018-12-31_0006.4.0.dict", "poc_english.txt"};
 		long startTime = System.currentTimeMillis();
 		if (args.length == 2) {
 			int single = 0;
