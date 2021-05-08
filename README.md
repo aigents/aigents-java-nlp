@@ -1,5 +1,5 @@
 # aigents-java-nlp
-Natural language processing components and tools for [Aigents](https://aigents.com/). Constructs a grammatically valid sentence from given parses or segments a given sentence. Refer to [this issue](https://github.com/aigents/aigents-java/issues/22) for a list of completed tasks and [this repository](https://github.com/aigents/aigents-java-nlp) for the finalized codebase.
+Natural language processing components and tools for [Aigents](https://aigents.com/). Refer to [this issue](https://github.com/aigents/aigents-java/issues/22) for a list of completed tasks.
 
 Table of Contents
 =================
@@ -146,12 +146,19 @@ The script above will output the rule and disjuncts associated with the word pas
 Citation
 =====
 
-Plain Text:
+[NLG Paper (Natural Language Generation Using Link Grammar for General Conversational Intelligence)](https://arxiv.org/abs/2105.00830):
+```
+@misc{ramesh2021natural,
+  title={Natural Language Generation Using Link Grammar for General Conversational Intelligence},
+  author={Vignav Ramesh and Anton Kolonin},
+  year={2021},
+  eprint={2105.00830},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL}
+}
+```
 
-V. Ramesh and A. Kolonin, "Interpretable Natural Language Segmentation Based on Link Grammar," 2020 Science and Artificial Intelligence conference (S.A.I.ence), Novosibirsk, Russia, 2020, pp. 25-32, doi: 10.1109/S.A.I.ence50533.2020.9303220.
-
-BibTeX:
-
+[NLS Paper (Interpretable Natural Language Segmentation Based on Link Grammar)](https://ieeexplore.ieee.org/document/9303220):
 ```
 @INPROCEEDINGS{9303220,
   author={V. {Ramesh} and A. {Kolonin}},
@@ -161,27 +168,6 @@ BibTeX:
   volume={},
   number={},
   pages={25-32},
-  doi={10.1109/S.A.I.ence50533.2020.9303220}}
-```
-
-RIS:
-
-```
-TY  - CONF
-TI  - Interpretable Natural Language Segmentation Based on Link Grammar
-T2  - 2020 Science and Artificial Intelligence conference (S.A.I.ence)
-SP  - 25
-EP  - 32
-AU  - V. Ramesh
-AU  - A. Kolonin
-PY  - 2020
-DO  - 10.1109/S.A.I.ence50533.2020.9303220
-JO  - 2020 Science and Artificial Intelligence conference (S.A.I.ence)
-IS  - 
-SN  - 
-VO  - 
-VL  - 
-JA  - 2020 Science and Artificial Intelligence conference (S.A.I.ence)
-Y1  - 14-15 Nov. 2020
-ER  - 
+  doi={10.1109/S.A.I.ence50533.2020.9303220}
+}
 ```
