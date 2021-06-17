@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import main.java.org.aigents.nlp.lg.Dictionary;
 import main.java.org.aigents.nlp.lg.Disjunct;
@@ -53,39 +54,51 @@ public class Responder {
 
 	public static void main(String[] args) throws IOException {
 		try {
-			if (args[0].contains("/4.0.dict")) {
-				Dictionary[] dicts = Loader.buildLGDict(args[0]);
-				dict = dicts[0];
-				hyphenated = dicts[1];
-			} else {
-				dict = Loader.grammarBuildLinks(args[0], true);
-			}
-			
-			corpusLexicon = Loader.getCorpusLexicon();
-			contextLexicon = Loader.getContextLexicon(args[1]);
-			
-			String[] words = new String[args.length - 2];
-			for (int i = 2; i < args.length; i++) {
-				words[i - 2] = args[i];
-			}
-
-			HashSet<String> ans = generateSentence(words);
-			if (!ans.isEmpty()) {
-				System.out.println(Arrays.toString(words) + ": " + ans);
-			} else {
-				results = new TreeMap<>(Collections.reverseOrder());
-				dw = contextLexicon.keySet();
-				int numWords = 1;
-				while (results.isEmpty()) {
-					String[] param = new String[words.length + numWords];
-					for (int i = 0; i < words.length; i++) {
-						param[i] = words[i];
-					}
-					int idx = words.length;
-					recurse(idx, param, words);
-					numWords++;
+			if (args.length > 2) {
+				if (args[0].contains("/4.0.dict")) {
+					Dictionary[] dicts = Loader.buildLGDict(args[0]);
+					dict = dicts[0];
+					hyphenated = dicts[1];
+				} else {
+					dict = Loader.grammarBuildLinks(args[0], true);
 				}
-				System.out.println(results);
+				
+				long startTime = System.currentTimeMillis();
+				
+				corpusLexicon = Loader.getCorpusLexicon();
+				contextLexicon = Loader.getContextLexicon(args[1]);
+								
+				String[] words = new String[args.length - 2];
+				for (int i = 2; i < args.length; i++) {
+					words[i - 2] = args[i];
+				}
+				HashSet<String> ans = generateSentence(words);
+				if (!ans.isEmpty()) {
+					System.out.println(Arrays.toString(words) + ": " + ans);
+				} else {
+					results = new TreeMap<>(Collections.reverseOrder());
+					dw = contextLexicon.keySet();
+					int numWords = 1;
+					while (results.isEmpty()) {
+						String[] param = new String[words.length + numWords];
+						for (int i = 0; i < words.length; i++) {
+							param[i] = words[i];
+						}
+						int idx = words.length;
+						recurse(idx, param, words);
+						numWords++;
+					}
+					
+					long runtime = System.currentTimeMillis() - startTime;
+					String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
+							TimeUnit.MILLISECONDS.toSeconds(runtime)
+									- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
+					
+					System.out.println(results);
+					System.out.println("Runtime: " + t);
+				}
+			} else {
+				System.out.println("Incorrect number of command line parameters given.");
 			}
 		} catch (Exception e) {
 			System.err.println("Error building dictionary. Please try again with a different filename.");
@@ -93,7 +106,6 @@ public class Responder {
 	}
 	
 	private static void recurse(int idx, String[] param, String[] words) {
-//		System.out.println(idx + ", " + Arrays.toString(param));
 		if (idx >= param.length) {
 			double rank = 0;
 			for (int i = words.length; i < param.length; i++) {
@@ -104,7 +116,7 @@ public class Responder {
 				clone[i] = param[i];
 			}
 			HashSet<String> pAns = generateSentence(clone);
-			if (!pAns.isEmpty()) {
+			if (!pAns.isEmpty() && !contains(pAns)) {
 				results.put(rank, pAns);
 			}
 			return;
@@ -114,13 +126,24 @@ public class Responder {
 			n[i] = param[i];
 		}
 		for (String w : dw) {
-			n[idx] = w;
-			recurse(idx+1, n, words);
+			if (!contains(n, w)) {
+				n[idx] = w;
+				recurse(idx+1, n, words);
+			}
 		}
 	}
 	
+	private static boolean contains(HashSet<String> pAns) {
+		for (HashSet<String> val : results.values()) {
+			if (val.equals(pAns)) return true;
+		}
+		return false;
+	}
+	
 	private static double zipfian(String w) {
-		return Math.log(1+contextLexicon.get(w))/Math.log(1+corpusLexicon.get(w));
+		int wContext = contextLexicon.get(w) == null? 0 : contextLexicon.get(w);
+		int wCorpus = corpusLexicon.get(w) == null? 0 : corpusLexicon.get(w);
+		return Math.log(1+wContext)/Math.log(1+wCorpus);
 	}
 	
 	public static HashSet<String> generateSentence(String[] elements) {
@@ -302,7 +325,7 @@ public class Responder {
 						if (i >= 4 && connectsMin(input[i-4], right)) continue outer;
 					}
 				}
-			} else if (left.equals("wants") && i + 2 < input.length) {
+			} else if (left.equals("wants") && i + 3 < input.length) {
 				if (right.equals("to")) {
 					i += 2;
 					if (connectsLeft("wants", "to", input[i]))
@@ -1024,7 +1047,7 @@ public class Responder {
 	
 	private static boolean contains(String[] input, String str) {
 		for (String s : input) {
-			if (s.equals(str))
+			if (s != null && s.equals(str))
 				return true;
 		}
 		return false;
