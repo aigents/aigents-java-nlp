@@ -46,7 +46,7 @@ To test `Responder.java`, choose one of the following two options:
     javac test/java/org/aigents/nlp/gen/*.java
     java main.java.org.aigents.nlp.gen.Responder dict_30C_2018-12-31_0006.4.0.dict <context filename, e.g. relationships_and_food.txt> <seed words separated by spaces, e.g. mom cake>
 
-For a list of context filenames, see [src/test/resources/contexts](https://github.com/aigents/aigents-java-nlp/tree/master/src/test/resources/contexts).
+For a list of context filenames, see [`src/test/resources/contexts`](https://github.com/aigents/aigents-java-nlp/tree/master/src/test/resources/contexts).
 
 Natural Language Segmentation
 -----
