@@ -54,6 +54,50 @@ public class Loader {
 		}
 	}
 	
+	public static HashMap<String, Integer> getContextLexicon(String fname) throws IOException {
+		HashMap<String, Integer> map = new HashMap<>();
+		Path p;
+		if (System.getProperty("user.dir").endsWith("src")) {
+			p = Paths.get(Paths.get("test/resources/contexts/" + fname).toAbsolutePath().toString());
+		} else {
+			p = Paths.get(Paths.get("src/test/resources/contexts/" + fname).toAbsolutePath().toString());
+		}
+		File f = p.toFile();
+		if (!f.exists()) return null;
+		List<String> list = Files.readAllLines(f.toPath());
+		Iterator<String> it = list.iterator();
+		while (it.hasNext()) {
+			String[] parts = it.next().split("\\s+");
+			for (String part : parts) {
+				part = part.toLowerCase();
+				if (part.length() == 0) continue;
+				if (part.endsWith(".")) part = part.substring(0, part.length() - 1);
+				if (map.containsKey(part)) map.put(part, map.get(part) + 1);
+				else map.put(part, 1);
+			}
+		}
+		return map;
+	}
+	
+	public static HashMap<String, Integer> getCorpusLexicon() throws IOException {
+		HashMap<String, Integer> map = new HashMap<>();
+		Path p;
+		if (System.getProperty("user.dir").endsWith("src")) {
+			p = Paths.get(Paths.get("test/resources/lexicon_english.txt").toAbsolutePath().toString());
+		} else {
+			p = Paths.get(Paths.get("src/test/resources/lexicon_english.txt").toAbsolutePath().toString());
+		}
+		File f = p.toFile();
+		if (!f.exists()) return null;
+		List<String> list = Files.readAllLines(f.toPath());
+		Iterator<String> it = list.iterator();
+		while (it.hasNext()) {
+			String[] parts = it.next().split("\\s+");
+			map.put(parts[0], Integer.parseInt(parts[1]));
+		}
+		return map;
+	}
+	
 	private static void find(Dictionary dict, String word) {
 		for (Word w : dict.getWords()) {
 			if (w.getWord().equals(word)) {
@@ -267,11 +311,9 @@ public class Loader {
 	public static Dictionary grammarBuildLinks(String path, boolean isGenerator) throws IOException {
 		Path p;
 		if (System.getProperty("user.dir").endsWith("src")) {
-			p = Paths.get(Paths.get("test/java/org/aigents/nlp/" + (isGenerator? "gen":"lg") 
-					+ "/" + path).toAbsolutePath().toString());
+			p = Paths.get(Paths.get("test/resources/" + path).toAbsolutePath().toString());
 		} else {
-			p = Paths.get(Paths.get("src/test/java/org/aigents/nlp/" + (isGenerator? "gen":"lg") 
-					+ "/" + path).toAbsolutePath().toString());
+			p = Paths.get(Paths.get("src/test/resources/" + path).toAbsolutePath().toString());
 		}
 		File f = p.toFile();
 		if (!f.exists()) return null;
