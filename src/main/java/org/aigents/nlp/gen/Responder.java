@@ -50,9 +50,12 @@ public class Responder {
 	public static Dictionary dict, hyphenated;
 	public static HashMap<String, Integer> corpusLexicon, contextLexicon;
 	public static TreeMap<Double, HashSet<String>> results;
-	public static Set<String> dw;
+	public static List<String> dw;
+	public static long startTime;
+	public static boolean stop = false;
 
 	public static void main(String[] args) throws IOException {
+		stop = false;
 		try {
 			if (args.length > 2) {
 				if (args[0].contains("/4.0.dict")) {
@@ -63,7 +66,7 @@ public class Responder {
 					dict = Loader.grammarBuildLinks(args[0], true);
 				}
 				
-				long startTime = System.currentTimeMillis();
+				startTime = System.currentTimeMillis();
 				
 				corpusLexicon = Loader.getCorpusLexicon();
 				contextLexicon = Loader.getContextLexicon(args[1]);
@@ -77,7 +80,13 @@ public class Responder {
 					System.out.println(Arrays.toString(words) + ": " + ans);
 				} else {
 					results = new TreeMap<>(Collections.reverseOrder());
-					dw = contextLexicon.keySet();
+
+					Set<String> dws = contextLexicon.keySet();
+					dw = new ArrayList<>(dws);
+					Collections.sort(dw, (o1, o2) -> {
+						return (int)(zipfian(o2) - zipfian(o1));
+					});
+					
 					int numWords = 1;
 					while (results.isEmpty()) {
 						String[] param = new String[words.length + numWords];
@@ -88,14 +97,6 @@ public class Responder {
 						recurse(idx, param, words);
 						numWords++;
 					}
-					
-					long runtime = System.currentTimeMillis() - startTime;
-					String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
-							TimeUnit.MILLISECONDS.toSeconds(runtime)
-									- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
-					
-					System.out.println(results);
-					System.out.println("Runtime: " + t);
 				}
 			} else {
 				System.out.println("Incorrect number of command line parameters given.");
@@ -106,6 +107,7 @@ public class Responder {
 	}
 	
 	private static void recurse(int idx, String[] param, String[] words) {
+		if (stop) return;
 		if (idx >= param.length) {
 			double rank = 0;
 			for (int i = words.length; i < param.length; i++) {
@@ -118,6 +120,14 @@ public class Responder {
 			HashSet<String> pAns = generateSentence(clone);
 			if (!pAns.isEmpty() && !contains(pAns)) {
 				results.put(rank, pAns);
+				long runtime = System.currentTimeMillis() - startTime;
+				String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
+						TimeUnit.MILLISECONDS.toSeconds(runtime)
+								- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
+				
+				System.out.println(results.get(results.firstKey()));
+				System.out.println("Runtime: " + t);
+				stop = true;
 			}
 			return;
 		}
