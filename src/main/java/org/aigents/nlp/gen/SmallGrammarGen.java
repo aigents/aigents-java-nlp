@@ -119,6 +119,7 @@ public class SmallGrammarGen {
 				System.out.println("Overall runtime: " + t);
 				System.out.println("Avg. runtime per sentence: " + t2);
 			} catch (Exception e) {
+				System.out.println(e);
 				System.err.println("Error building dictionary. Please try again with a different filename.");
 			}
 		} else if (args.length > 2) {
@@ -141,6 +142,11 @@ public class SmallGrammarGen {
 		} else {
 			System.out.println("No command line parameters given.");
 		}
+	}
+	
+	public static HashSet<String> generateSentence(Dictionary d, String[] elements) {
+		dict = d;
+		return generateSentence(elements);
 	}
 	
 	public static HashSet<String> generateSentence(String[] elements) {

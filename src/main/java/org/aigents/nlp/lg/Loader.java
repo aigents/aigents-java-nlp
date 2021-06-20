@@ -79,13 +79,21 @@ public class Loader {
 		return map;
 	}
 	
-	public static HashMap<String, Integer> getCorpusLexicon() throws IOException {
+	public static HashMap<String, Integer> getCorpusLexicon(String args) throws IOException {
 		HashMap<String, Integer> map = new HashMap<>();
 		Path p;
-		if (System.getProperty("user.dir").endsWith("src")) {
-			p = Paths.get(Paths.get("test/resources/lexicon_english.txt").toAbsolutePath().toString());
+		if (args.contains("/4.0.dict")) {
+			if (System.getProperty("user.dir").endsWith("src")) {
+				p = Paths.get(Paths.get("test/resources/full_lexicon_english.txt").toAbsolutePath().toString());
+			} else {
+				p = Paths.get(Paths.get("src/test/resources/full_lexicon_english.txt").toAbsolutePath().toString());
+			}
 		} else {
-			p = Paths.get(Paths.get("src/test/resources/lexicon_english.txt").toAbsolutePath().toString());
+			if (System.getProperty("user.dir").endsWith("src")) {
+				p = Paths.get(Paths.get("test/resources/lexicon_english.txt").toAbsolutePath().toString());
+			} else {
+				p = Paths.get(Paths.get("src/test/resources/lexicon_english.txt").toAbsolutePath().toString());
+			}
 		}
 		File f = p.toFile();
 		if (!f.exists()) return null;

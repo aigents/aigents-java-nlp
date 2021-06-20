@@ -25,9 +25,7 @@
 package main.java.org.aigents.nlp.gen;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -159,6 +157,17 @@ public class Generator {
 		} else {
 			System.out.println("No command line parameters given.");
 		}
+	}
+	
+	public static HashSet<String> generateSentence(Dictionary d, Dictionary h, String[] elements) {
+		dict = d;
+		hyphenated = h;
+		return generateSentence(elements);
+	}
+	
+	public static HashSet<String> generateSentence(Dictionary d, String[] elements) {
+		dict = d;
+		return generateSentence(elements);
 	}
 
 	public static HashSet<String> generateSentence(String[] elements) {
