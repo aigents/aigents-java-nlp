@@ -62,36 +62,31 @@ public class Responder {
 				
 				corpusLexicon = Loader.getCorpusLexicon(args[0]);
 				contextLexicon = Loader.getContextLexicon(args[1]);
-								
+												
 				String[] words = new String[args.length - 2];
 				for (int i = 2; i < args.length; i++) {
 					words[i - 2] = args[i];
 				}
 				
-				HashSet<String> ans = generateSentence(args[0], words);
-					
-				if (!ans.isEmpty()) {
-					System.out.println(Arrays.toString(words) + ": " + ans);
-				} else {
-					results = new TreeMap<>(Collections.reverseOrder());
+				results = new TreeMap<>(Collections.reverseOrder());
 
-					Set<String> dws = contextLexicon.keySet();
-					dw = new ArrayList<>(dws);
-					Collections.sort(dw, (o1, o2) -> {
-						return (int)(zipfian(o2) - zipfian(o1));
-					});
+				Set<String> dws = contextLexicon.keySet();
+				dw = new ArrayList<>(dws);
+				Collections.sort(dw, (o1, o2) -> {
+					return (int)(zipfian(o2) - zipfian(o1));
+				});
 					
-					int numWords = 1;
-					while (results.isEmpty()) {
-						String[] param = new String[words.length + numWords];
-						for (int i = 0; i < words.length; i++) {
-							param[i] = words[i];
-						}
-						int idx = words.length;
-						recurse(args[0], idx, param, words);
-						numWords++;
+				int numWords = 1;
+				while (results.isEmpty()) {
+					String[] param = new String[words.length + numWords];
+					for (int i = 0; i < words.length; i++) {
+						param[i] = words[i];
 					}
+					int idx = words.length;
+					recurse(args[0], idx, param, words);
+					numWords++;
 				}
+				System.out.println(results);
 			} else {
 				System.out.println("Incorrect number of command line parameters given.");
 			}
@@ -99,18 +94,18 @@ public class Responder {
 			System.err.println("Error building dictionary. Please try again with a different filename.");
 		}
 	}
-	
+
 	public static HashSet<String> generateSentence(String args, String[] words) {
 		if (args.contains("/4.0.dict")) {
 			return Generator.generateSentence(dict, hyphenated, words);
-		}
-		else {
+		} else {
 			return SmallGrammarGen.generateSentence(dict, words);
 		}
 	}
-	
+
 	private static void recurse(String args, int idx, String[] param, String[] words) {
-		if (stop) return;
+		if (stop && (System.currentTimeMillis() - startTime) > 120000)
+			return;
 		if (idx >= param.length) {
 			double rank = 0;
 			for (int i = words.length; i < param.length; i++) {
@@ -123,13 +118,6 @@ public class Responder {
 			HashSet<String> pAns = generateSentence(args, clone);
 			if (!pAns.isEmpty() && !contains(pAns)) {
 				results.put(rank, pAns);
-				long runtime = System.currentTimeMillis() - startTime;
-				String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
-						TimeUnit.MILLISECONDS.toSeconds(runtime)
-								- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
-				
-				System.out.println(results.get(results.firstKey()));
-				System.out.println("Runtime: " + t);
 				stop = true;
 			}
 			return;
@@ -141,24 +129,25 @@ public class Responder {
 		for (String w : dw) {
 			if (!contains(n, w)) {
 				n[idx] = w;
-				recurse(args, idx+1, n, words);
+				recurse(args, idx + 1, n, words);
 			}
 		}
 	}
-	
+
 	private static boolean contains(HashSet<String> pAns) {
 		for (HashSet<String> val : results.values()) {
-			if (val.equals(pAns)) return true;
+			if (val.equals(pAns))
+				return true;
 		}
 		return false;
 	}
-	
+
 	private static double zipfian(String w) {
-		int wContext = contextLexicon.get(w) == null? 0 : contextLexicon.get(w);
-		int wCorpus = corpusLexicon.get(w) == null? 0 : corpusLexicon.get(w);
-		return Math.log(1+wContext)/Math.log(1+wCorpus);
+		int wContext = contextLexicon.get(w) == null ? 0 : contextLexicon.get(w);
+		int wCorpus = corpusLexicon.get(w) == null ? 0 : corpusLexicon.get(w);
+		return Math.log(1 + wContext) / Math.log(1 + wCorpus);
 	}
-		
+
 	private static boolean contains(String[] input, String str) {
 		for (String s : input) {
 			if (s != null && s.equals(str))

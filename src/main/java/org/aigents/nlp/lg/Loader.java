@@ -71,7 +71,8 @@ public class Loader {
 			for (String part : parts) {
 				part = part.toLowerCase();
 				if (part.length() == 0) continue;
-				if (part.endsWith(".")) part = part.substring(0, part.length() - 1);
+				part = part.replace("\"", "");
+				if (part.endsWith(".") || part.endsWith(",") || part.endsWith(";")) part = part.substring(0, part.length() - 1);
 				if (map.containsKey(part)) map.put(part, map.get(part) + 1);
 				else map.put(part, 1);
 			}

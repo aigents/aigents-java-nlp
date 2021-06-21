@@ -9,10 +9,10 @@ public class TestResponder {
     	System.out.println("SMALL WORLD GRAMMAR");
     	System.out.println("===================");
         runTests("dict_30C_2018-12-31_0006.4.0.dict");
-        
-        System.out.println("\nFULL LINK GRAMMAR");
+    	
+    	System.out.println("\nSQuAD");
     	System.out.println("===================");
-    	runTests("en/4.0.dict");
+    	squad("en/4.0.dict");
     }
     
     private static void runTests(String fname) throws IOException {
@@ -23,5 +23,10 @@ public class TestResponder {
         System.out.println("\nContext: Professions, Question: daughter directors");
         Responder.main(new String[] {fname, "professions.txt", 
         		"daughter", "board", "of", "directors"});
+    }
+    
+    private static void squad(String fname) throws IOException {
+    	System.out.println("Context: Normans, Question: monks fled");
+        Responder.main(new String[] {"en/4.0.dict", "squad/normans_cleaned.txt", "monks", "fled", "to"});
     }
 }
