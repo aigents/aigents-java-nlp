@@ -30,5 +30,7 @@ public class TestResponder {
         Responder.main(new String[] {"en/4.0.dict", "squad/normans_cleaned.txt", "monks", "fled", "to"});
         System.out.println("\nContext: Imperialism, Question: imperialism focused on");
         Responder.main(new String[] {fname, "squad/imperialism_cleaned.txt", "imperialism", "focused", "on"});
+        System.out.println("\nContext: Pharmacy, Question: pharmacists are");
+        Responder.main(new String[] {fname, "squad/pharmacy_cleaned.txt", "pharmacists", "are"});
     }
 }

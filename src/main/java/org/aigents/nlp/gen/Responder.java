@@ -46,7 +46,7 @@ public class Responder {
 	public static boolean stop = false;
 	public static long limit = 0;
 
-	public static void main(String[] args) throws IOException {		
+	public static void main(String[] args) throws IOException {	
 		stop = false;
 		try {
 			if (args.length > 2) {
@@ -77,7 +77,7 @@ public class Responder {
 					else if (zipfian(o2)<zipfian(o1)) return -1;
 					else return 0;
 				});
-					
+								
 				int numWords = 1;
 				while (results.isEmpty()) {
 					String[] param = new String[words.length + numWords];

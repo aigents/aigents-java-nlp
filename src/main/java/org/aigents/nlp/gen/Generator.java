@@ -452,6 +452,7 @@ public class Generator {
 						|| dict.getSubscript(input[0]).contains("n-u")
 						|| dict.getSubscript(input[0]).contains("p")))
 			return false;
+		if (fname.contains("y_c") && !dict.getSubscript(input[input.length-1]).contains("n")) return false;
 		if ((dict.getSubscript(input[input.length-1]).contains("j-ru") 
 				|| dict.getSubscript(input[input.length-1]).contains("r")
 				|| dict.getSubscript(input[input.length-1]).contains("e")
@@ -961,6 +962,8 @@ public class Generator {
 			return false;
 		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u") && dict.getSubscript(left.toLowerCase().trim()).contains("f"))
 			return false;
+		if (fname.contains("y_c") && dict.getSubscript(left).contains("n") && dict.getSubscript(left).size() == 1
+				&& dict.getSubscript(right).contains("n") && dict.getSubscript(right).size() == 1) return false;
 		return true;
 	}
 
@@ -1363,10 +1366,13 @@ public class Generator {
 		if (fname.contains("m_c")) {
 			if (wlu.contains("J")) b=false;
 		}
+		else if (fname.contains("y_c")) {
+			if (wr.contains("Spx")) wlu="Sp";
+		}
 		if ((wlu.equals("AN-")&&wr.equals("AN-"))) {
 			wlu="Sp-";wr="S-";b=false;
 		}
-		if (!(wlu.contains("MV")||wlu.contains("Dmc")||(!b&&wlu.contains("J"))||(!b&&wlu.contains("S"))) && (!leftRule.toString().contains(wlu) || !rightRule.toString().contains(wr))) return false;
+		if (!(fname.contains("y_c")&&wlu.contains("Op")) && !(wlu.contains("MV")||wlu.contains("Dmc")||(!b&&wlu.contains("J"))||(!b&&wlu.contains("S"))) && (!leftRule.toString().contains(wlu) || !rightRule.toString().contains(wr))) return false;
 		wlu = wlu.replace("@", "");
 		wr = wr.replace("@", "");
 		if (wlu.equals(wr)) {
@@ -1380,13 +1386,12 @@ public class Generator {
 			if (wlu.length() <= 1 && wlu.length() < wr.length()) return false;
 			if (wr.length() <= 1 && wr.length() < wlu.length()) return false;
 		}
-		if (wlu.length() < wr.length()) {  //1 < wlu.length() && 
+		if (wlu.length() < wr.length()) {
 			if (wlu.equals(wr.substring(0, wlu.length()))) {
 				return true;
 			}
-				
 		}
-		if (wr.length() < wlu.length()) { //1 < wr.length()  && 
+		if (wr.length() < wlu.length()) {
 			if (wr.equals(wlu.substring(0, wr.length()))) {
 				return true;
 			}
