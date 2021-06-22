@@ -339,7 +339,7 @@ public class SmallGrammarGen {
 						if (connectsFour(left, right, input[i - 1], input[i]))
 							continue outer;
 					}
-				} else if (input[i + 3].equals("to")) {
+				} else if (i+3<input.length && input[i + 3].equals("to")) {
 					if (i + 4 < input.length) {
 						i += 4;
 						if (connectsFour(left, input[i-2], input[i - 1], input[i])) {
@@ -1099,6 +1099,11 @@ public class SmallGrammarGen {
 				break;
 			}
 		}
+		String second = input[1].toLowerCase();
+		if (dict.getRule(first.toLowerCase()).toString().equals(dict.getRule("mom").toString()) 
+				&& dict.getRule(second.toLowerCase()).toString().equals(dict.getRule("a").toString())) return false;
+		if (dict.getRule(second.toLowerCase()).toString().equals(dict.getRule("mom").toString()) 
+				&& dict.getRule(first.toLowerCase()).toString().equals(dict.getRule("a").toString())) return false;
 		return firstTrue && lastTrue;
 	}
 }
