@@ -7,7 +7,7 @@ Table of Contents
 <!--ts-->
    * [Build Script](#build-script)
    * [Usage](#usage)
-      * [Small World Question Answering](#small-world-question-answering)
+      * [Question Answering](#Question-answering)
       * [Natural Language Segmentation](#natural-language-segmentation)
       * [Natural Language Generation](#natural-language-generation)
       * [Small World NLG](#small-world-nlg)
@@ -25,10 +25,10 @@ To build the project, run `ant war` in the command line.
 Usage
 =====
 
-Small World Question Answering
+Question Answering
 -----
 
-To test `Responder.java`, choose one of the following two options:
+To test `Responder.java`, choose one of the following three options:
 
 **ONE:** To execute a series of unit tests, run
 
@@ -37,8 +37,16 @@ To test `Responder.java`, choose one of the following two options:
     javac main/java/org/aigents/nlp/gen/*.java
     javac test/java/org/aigents/nlp/gen/*.java
     java test.java.org.aigents.nlp.gen.TestResponder
+    
+**TWO:** To execute a series of POC-English queries, run
 
-**TWO:** To obtain the response for a particular question, run
+    cd src
+    javac main/java/org/aigents/nlp/lg/*.java
+    javac main/java/org/aigents/nlp/gen/*.java
+    javac test/java/org/aigents/nlp/gen/*.java
+    java main.java.org.aigents.nlp.gen.Responder dict_30C_2018-12-31_0006.4.0.dict poc_english_queries.txt
+
+**THREE:** To obtain the response for a particular question, run
 
     cd src
     javac main/java/org/aigents/nlp/lg/*.java

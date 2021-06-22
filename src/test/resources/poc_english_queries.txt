@@ -1,0 +1,60 @@
+relationships_and_food.txt mom human
+relationships_and_food.txt dad human
+relationships_and_food.txt mom parent
+relationships_and_food.txt dad parent
+relationships_and_food.txt son child
+relationships_and_food.txt daughter child
+relationships_and_food.txt son human
+relationships_and_food.txt daughter human
+relationships_and_food.txt mom cake
+relationships_and_food.txt daughter cake
+relationships_and_food.txt son sausage
+relationships_and_food.txt dad sausage
+relationships_and_food.txt cake food
+relationships_and_food.txt sausage food
+relationships_and_food.txt mom human now
+relationships_and_food.txt dad human now
+relationships_and_food.txt mom parent now
+relationships_and_food.txt dad parent now
+relationships_and_food.txt son child now
+relationships_and_food.txt daughter child now
+relationships_and_food.txt son human now
+relationships_and_food.txt daughter human now
+relationships_and_food.txt mom cake now
+relationships_and_food.txt daughter cake now
+relationships_and_food.txt son sausage now
+relationships_and_food.txt dad sausage now
+relationships_and_food.txt cake food now
+relationships_and_food.txt sausage food now
+relationships_and_food.txt mom daughter before
+relationships_and_food.txt dad son before
+relationships_and_food.txt mom parent before
+relationships_and_food.txt dad parent before
+relationships_and_food.txt mom cake before
+relationships_and_food.txt dad sausage before
+relationships_and_food.txt cake food before
+relationships_and_food.txt sausage food before
+professions.txt mom board of directors
+professions.txt dad board of directors
+professions.txt son board of directors
+professions.txt daughter board of directors
+professions.txt mom chalk
+professions.txt dad chalk
+professions.txt son chalk
+professions.txt daughter chalk
+tools_and_possession.txt mom hammer
+tools_and_possession.txt mom saw
+tools_and_possession.txt dad hammer
+tools_and_possession.txt dad saw
+tools_and_possession.txt mom telescope
+tools_and_possession.txt mom binoculars
+tools_and_possession.txt dad telescope
+tools_and_possession.txt dad binoculars
+tools_and_possession.txt saw tool
+tools_and_possession.txt hammer tool
+tools_and_possession.txt binoculars tool
+tools_and_possession.txt telescope tool
+tools_and_possession.txt saw is
+tools_and_possession.txt hammer is
+tools_and_possession.txt binoculars are
+tools_and_possession.txt telescope is

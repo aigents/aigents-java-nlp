@@ -24,11 +24,16 @@
 
 package main.java.org.aigents.nlp.gen;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -87,11 +92,67 @@ public class Responder {
 					int idx = words.length;
 					recurseFirst(args[0], args[1], idx, param, words);
 					if (results.isEmpty()) {
-						recurse(args[0], args[1], idx, param, words);
+						recurse(args[0], args[1], idx, param, words, true);
 					}
 					numWords++;
 				}
-			} else {
+			} else if (args.length == 2) {
+				if (args[0].contains("/4.0.dict")) {
+					Dictionary[] dicts = Loader.buildLGDict(args[0]);
+					dict = dicts[0];
+					hyphenated = dicts[1];
+				} else {
+					dict = Loader.grammarBuildLinks(args[0], true);
+				}
+				
+				Path p;
+				if (System.getProperty("user.dir").endsWith("src")) {
+					p = Paths.get(Paths.get("test/resources/" + args[1]).toAbsolutePath().toString());
+				} else {
+					p = Paths.get(Paths.get("src/test/resources/" + args[1]).toAbsolutePath().toString());
+				}
+				File f = p.toFile();
+				List<String> list = Files.readAllLines(f.toPath());
+				Iterator<String> it = list.iterator();
+				while (it.hasNext()) {
+					String w = it.next();
+					if (w.length() == 0) continue;
+					String[] parts = w.split(" ");
+					
+					startTime = System.currentTimeMillis();
+					
+					corpusLexicon = Loader.getCorpusLexicon(args[0]);
+					contextLexicon = Loader.getContextLexicon(parts[0]);
+													
+					String[] words = new String[parts.length - 1];
+					for (int i = 1; i < parts.length; i++) {
+						words[i - 1] = parts[i];
+					}
+					
+					results = new TreeMap<>(Collections.reverseOrder());
+
+					Set<String> dws = contextLexicon.keySet();
+					dw = new ArrayList<>(dws);
+					Collections.sort(dw, (o1, o2) -> {
+						if (zipfian(o2)>zipfian(o1)) return 1;
+						else if (zipfian(o2)<zipfian(o1)) return -1;
+						else return 0;
+					});
+									
+					int numWords = 1;
+					while (results.isEmpty()) {
+						String[] param = new String[words.length + numWords];
+						for (int i = 0; i < words.length; i++) {
+							param[i] = words[i];
+						}
+						int idx = words.length;
+						recurse(args[0], parts[0], idx, param, words, false);
+						numWords++;
+					}
+					stop = false;
+				}
+			}
+			else {
 				System.out.println("Incorrect number of command line parameters given.");
 			}
 		} catch (Exception e) {
@@ -154,7 +215,7 @@ public class Responder {
 		}
 	}
 	
-	private static void recurse(String args, String args1,  int idx, String[] param, String[] words) {
+	private static void recurse(String args, String args1,  int idx, String[] param, String[] words, boolean print) {
 		if (stop && (System.currentTimeMillis() -startTime)>limit) return;
 		if (idx >= param.length) {
 			double rank = 0;
@@ -172,9 +233,8 @@ public class Responder {
 				String t = String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(runtime),
 						TimeUnit.MILLISECONDS.toSeconds(runtime)
 								- TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(runtime)));
-				
 				System.out.println(results.get(results.lastKey()));
-				System.out.println("Runtime: " + t);
+				if (print) System.out.println("Runtime: " + t);
 				stop = true;
 			}
 			return;
@@ -186,7 +246,7 @@ public class Responder {
 		for (String w : dw) {
 			if (!contains(n, w)) {
 				n[idx] = w;
-				recurse(args, args1, idx+1, n, words);
+				recurse(args, args1, idx+1, n, words, print);
 			}
 		}
 	}
