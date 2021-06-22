@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,7 +70,8 @@ public class Loader {
 			for (String part : parts) {
 				part = part.toLowerCase();
 				if (part.length() == 0) continue;
-				if (part.endsWith(".")) part = part.substring(0, part.length() - 1);
+				part = part.replace("\"", "");
+				if (part.endsWith(".") || part.endsWith(",") || part.endsWith(";")) part = part.substring(0, part.length() - 1);
 				if (map.containsKey(part)) map.put(part, map.get(part) + 1);
 				else map.put(part, 1);
 			}
@@ -79,13 +79,21 @@ public class Loader {
 		return map;
 	}
 	
-	public static HashMap<String, Integer> getCorpusLexicon() throws IOException {
+	public static HashMap<String, Integer> getCorpusLexicon(String args) throws IOException {
 		HashMap<String, Integer> map = new HashMap<>();
 		Path p;
-		if (System.getProperty("user.dir").endsWith("src")) {
-			p = Paths.get(Paths.get("test/resources/lexicon_english.txt").toAbsolutePath().toString());
+		if (args.contains("/4.0.dict")) {
+			if (System.getProperty("user.dir").endsWith("src")) {
+				p = Paths.get(Paths.get("test/resources/full_lexicon_english.txt").toAbsolutePath().toString());
+			} else {
+				p = Paths.get(Paths.get("src/test/resources/full_lexicon_english.txt").toAbsolutePath().toString());
+			}
 		} else {
-			p = Paths.get(Paths.get("src/test/resources/lexicon_english.txt").toAbsolutePath().toString());
+			if (System.getProperty("user.dir").endsWith("src")) {
+				p = Paths.get(Paths.get("test/resources/lexicon_english.txt").toAbsolutePath().toString());
+			} else {
+				p = Paths.get(Paths.get("src/test/resources/lexicon_english.txt").toAbsolutePath().toString());
+			}
 		}
 		File f = p.toFile();
 		if (!f.exists()) return null;

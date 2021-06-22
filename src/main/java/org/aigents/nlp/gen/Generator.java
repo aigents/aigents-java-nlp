@@ -25,9 +25,7 @@
 package main.java.org.aigents.nlp.gen;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,8 +43,9 @@ import main.java.org.aigents.nlp.lg.Rule;
 public class Generator {
 	public static Dictionary dict, hyphenated;
 	public static boolean tooMuch = false;
+	public static String fname = "";
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {	
 		long startTime = System.currentTimeMillis();
 		if (args.length == 2) {
 			int single = 0;
@@ -159,6 +158,30 @@ public class Generator {
 		} else {
 			System.out.println("No command line parameters given.");
 		}
+	}
+	
+	public static HashSet<String> generateSentence(Dictionary d, Dictionary h, String f, String[] elements) {
+		dict = d;
+		hyphenated = h;
+		fname = f;
+		return generateSentence(elements);
+	}
+	
+	public static HashSet<String> isValid(Dictionary d, Dictionary h, String f, String[] elements) {
+		dict = d;
+		hyphenated = h;
+		fname = f;
+		HashSet<String> ans = new HashSet<>();
+		if (isValid(elements)) {
+			ans.add(sentence(elements));
+		}
+		return ans;
+	}
+	
+	public static HashSet<String> generateSentence(Dictionary d, String f, String[] elements) {
+		dict = d;
+		fname = f;
+		return generateSentence(elements);
 	}
 
 	public static HashSet<String> generateSentence(String[] elements) {
@@ -422,9 +445,23 @@ public class Generator {
 		if (idx(input, "A") != -1 && idx(input, "A") != 0)
 			return false;
 		if (contains(input, ",") && input.length < 6) return false;
-		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d"))
-				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") || dict.getSubscript(input[0]).contains("n-u")
+		if (input[0].equals("abbot")) return false;
+		if ((dict.getSubscript(input[0]).contains("v") || dict.getSubscript(input[0]).contains("v-d") 
+				|| dict.getSubscript(input[0]).contains("j-ru") || dict.getSubscript(input[0]).contains("r"))
+				&& !(dict.getSubscript(input[1]).contains("a") || dict.getSubscript(input[0]).contains("n") 
+						|| dict.getSubscript(input[0]).contains("n-u")
 						|| dict.getSubscript(input[0]).contains("p")))
+			return false;
+		if (fname.contains("y_c") && !dict.getSubscript(input[input.length-1]).contains("n")) return false;
+		if ((dict.getSubscript(input[input.length-1]).contains("j-ru") 
+				|| dict.getSubscript(input[input.length-1]).contains("r")
+				|| dict.getSubscript(input[input.length-1]).contains("e")
+				|| dict.getSubscript(input[input.length-1]).contains("c")
+				|| dict.getSubscript(input[input.length-1]).contains("v-d")
+				|| dict.getSubscript(input[input.length-1]).contains("a"))
+				&& !(dict.getSubscript(input[input.length-1]).contains("n") 
+						|| dict.getSubscript(input[input.length-1]).contains("n-u")
+						|| dict.getSubscript(input[input.length-1]).contains("p")))
 			return false;
 		for (int i = 0; i < input.length; i++) {
 			if (!input[i].equals("A")) {
@@ -442,6 +479,7 @@ public class Generator {
 				&& !dict.getSubscript(last).contains("g") 
 				&& !dict.getSubscript(last).contains("n-u"))))
 			return false;
+
 		outer: for (int i = 0; i < input.length - 1; i++) {
 			String left = input[i];
 			String right = input[i + 1];
@@ -504,7 +542,9 @@ public class Generator {
 				}
 				if (connects(left, input[input.length - 1])) continue outer;
 			} else if (left.equals("to") && right.equals("the") && i + 2 < input.length) {
-				if (connects(left, input[i+2])) continue outer;
+				if (connects(left, input[i+2])) {
+					continue outer;
+				}
 			} else if (left.equals("on") && right.equals("the") && i + 2 < input.length) {
 				i++;
 				if (connects(left, input[i + 1]) && connects(right, input[i + 1]))
@@ -532,7 +572,8 @@ public class Generator {
 					i = fin;
 					if (v) continue outer;
 				}
-			} else if ((right.equals("a") || right.equals("the")) && !dict.getSubscript(left).contains("a") && !left.equals("has") && i + 2 < input.length 
+			} else if ((right.equals("a") || right.equals("the")) && !dict.getSubscript(left).contains("a") 
+					&& !left.equals("has") && i + 2 < input.length 
 					&& (dict.getSubscript(input[i+2]).isEmpty()? true : dict.getSubscript(input[i+2]).contains("n") 
 							|| dict.getSubscript(input[i+2]).contains("n-u"))) {
 				i++;
@@ -594,7 +635,6 @@ public class Generator {
 	}
 	
 	private static boolean connects(String left, String right) {
-		if (!hyphenated.getRule("each_other").isEmpty()) return true;
 		if (!checkLR(left, right)) return false;
 		ArrayList<Rule> leftList = dict.getRule(left), rightList = dict.getRule(right);
 		if (leftList.size() == 0) {
@@ -733,9 +773,6 @@ public class Generator {
 					id++;
 				}
 				
-				Lops.addAll(toAddLops);
-				Rops.addAll(toAddRops);
-				
 				for (String l : lr.split(" or ")) {
 					int ri = -1;
 					rloop: for (String r : rr.split(" or ")) {
@@ -775,7 +812,7 @@ public class Generator {
 						if (fr.endsWith(" & "))
 							fr = fr.substring(0, fr.length() - 3);
 						fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-						if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
+						if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule)) {
 							return true;
 						}
 					}
@@ -805,7 +842,7 @@ public class Generator {
 								if (fr.endsWith(" & "))
 									fr = fr.substring(0, fr.length() - 3);
 								fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-								if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
+								if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule)) {
 									return true;
 								}
 							}
@@ -852,7 +889,7 @@ public class Generator {
 								}
 							}
 							if (fr.endsWith(" & ")) fr = fr.substring(0, fr.length() - 3);
-							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
+							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule)) {
 								return true;
 							}
 						}
@@ -901,7 +938,7 @@ public class Generator {
 							fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
 							for (String pfr : fr.split(" & ")) {
 								for (String pfl : fl.split(" & ")) {
-									if (!pfl.isEmpty() && !pfr.isEmpty() && equals(pfl.trim(), pfr.trim())) {
+									if (!pfl.isEmpty() && !pfr.isEmpty() && equals(pfl.trim(), pfr.trim(), leftRule, rightRule)) {
 										return true;
 									}
 								}
@@ -925,6 +962,8 @@ public class Generator {
 			return false;
 		if (dict.getSubscript(right.toLowerCase().trim()).contains("n-u") && dict.getSubscript(left.toLowerCase().trim()).contains("f"))
 			return false;
+		if (fname.contains("y_c") && dict.getSubscript(left).contains("n") && dict.getSubscript(left).size() == 1
+				&& dict.getSubscript(right).contains("n") && dict.getSubscript(right).size() == 1) return false;
 		return true;
 	}
 
@@ -1020,7 +1059,7 @@ public class Generator {
 						if (fr.endsWith(" & "))
 							fr = fr.substring(0, fr.length() - 3);
 						fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-						if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
+						if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule)) {
 							return new Object[] { true, isLeft ? li : ri };
 						}
 					}
@@ -1055,7 +1094,7 @@ public class Generator {
 								if (fr.endsWith(" & "))
 									fr = fr.substring(0, fr.length() - 3);
 								fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-								if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim()))
+								if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule))
 									return new Object[] { true, isLeft ? li : ri };
 							}
 						}
@@ -1106,7 +1145,7 @@ public class Generator {
 							}
 							if (fr.endsWith(" & "))
 								fr = fr.substring(0, fr.length() - 3);
-							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim()))
+							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule))
 								return new Object[] { true, isLeft ? li : ri };
 						}
 					}
@@ -1156,7 +1195,7 @@ public class Generator {
 							if (fl.endsWith(" & "))
 								fl = fl.substring(0, fl.length() - 3);
 							fl = fl.replaceAll("\\+", "/").replaceAll("-", "\\+").replaceAll("/", "-");
-							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim())) {
+							if (!fl.isEmpty() && !fr.isEmpty() && equals(fl.trim(), fr.trim(), leftRule, rightRule)) {
 								return new Object[] { true, isLeft ? li : ri };
 							}
 						}
@@ -1322,54 +1361,44 @@ public class Generator {
 		return (boolean) leftMid[0] && (boolean) leftRight[0] && (int) leftMid[1] < (int) leftRight[1];
 	}
 
-	private static boolean equals(String wlu, String wr) {
+	private static boolean equals(String wlu, String wr, Rule leftRule, Rule rightRule) {
+		boolean b = true;
+		if (fname.contains("m_c")) {
+			if (wlu.contains("J")) b=false;
+		}
+		else if (fname.contains("y_c")) {
+			if (wr.contains("Spx")) wlu="Sp";
+		}
+		if ((wlu.equals("AN-")&&wr.equals("AN-"))) {
+			wlu="Sp-";wr="S-";b=false;
+		}
+		if (!(fname.contains("y_c")&&wlu.contains("Op")) && !(wlu.contains("MV")||wlu.contains("Dmc")||(!b&&wlu.contains("J"))||(!b&&wlu.contains("S"))) && (!leftRule.toString().contains(wlu) || !rightRule.toString().contains(wr))) return false;
 		wlu = wlu.replace("@", "");
 		wr = wr.replace("@", "");
 		if (wlu.equals(wr)) {
 			return true;
 		}
-		if (wlu.contains("*")) {
-			int idx = wlu.indexOf("*");
-			int lid = wlu.lastIndexOf("*");
-			if (wr.length() == wlu.length()) {
-				if (wlu.substring(0, idx).equals(wr.substring(0, idx))
-						&& wlu.substring(lid + 1).equals(wr.substring(lid + 1))) {
-					return true;
-				}
-			} else {
-				if (idx + 1 > wr.length() && wlu.substring(0, idx).equals(wr.substring(0, Math.min(wr.length(), idx))))
-					return true;
-			}
-		}
-		if (wr.contains("*")) {
-			int idx = wr.indexOf("*");
-			int lid = wr.lastIndexOf("*");
-			if (wr.length() == wlu.length()) {
-				if (wlu.substring(0, idx).equals(wr.substring(0, idx))
-						&& wlu.substring(lid + 1).equals(wr.substring(lid + 1))) {
-					return true;
-				}
-			} else {
-				if (idx + 1 > wlu.length()
-						&& wlu.substring(0, Math.min(wlu.length(), idx)).equals(wr.substring(0, idx))) {
-					return true;
-				}
-			}
-		}
 		wr = wr.replace("-", "");
 		wlu = wlu.replace("-", "");
 		if (wlu.contains("&") || wr.contains("&"))
 			return false;
+		if (b) {
+			if (wlu.length() <= 1 && wlu.length() < wr.length()) return false;
+			if (wr.length() <= 1 && wr.length() < wlu.length()) return false;
+		}
 		if (wlu.length() < wr.length()) {
-			if (wlu.equals(wr.substring(0, wlu.length())))
+			if (wlu.equals(wr.substring(0, wlu.length()))) {
 				return true;
+			}
 		}
 		if (wr.length() < wlu.length()) {
-			if (wr.equals(wlu.substring(0, wr.length())))
+			if (wr.equals(wlu.substring(0, wr.length()))) {
 				return true;
+			}
 			try {
-				if (wr.equals(wlu.substring(1, wr.length()+1)))
+				if (wr.equals(wlu.substring(1, wr.length()+1))) {
 					return true;
+				}	
 			} catch (Exception e) {
 			}
 		}
