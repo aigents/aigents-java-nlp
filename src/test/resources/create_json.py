@@ -39,7 +39,7 @@ for line in f:
     question = ""
     for k in range(len(parts)-1):
         question = question + parts[k+1].rstrip() + " "
-    question = question[0:len(question)-1]
+    question = question[0:len(question)-1] + "?"
     answer = answers[i]
     if "relationships" in parts[0]:
         context1['qas'].append({
