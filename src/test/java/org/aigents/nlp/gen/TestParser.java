@@ -8,7 +8,10 @@ public class TestParser {
 
 	public static void main(String[] args) throws IOException {		
 		System.out.println("Testing Parser.java");
-        Parser.main(new String[] {"en/4.0.dict", "Tuna is a fish"});
+        Parser parser = new Parser();                 //Create parser object
+        parser.loadDict();                            //Load default dictionary
+        if(parser.isDictLoaded())
+        	System.out.println("Dictionary loaded. "+parser.printDictInfo());
         System.out.println("test finished");
 	}
 }
