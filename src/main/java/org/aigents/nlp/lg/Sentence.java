@@ -22,25 +22,25 @@
  * SOFTWARE.
  */
 
-package test.java.org.aigents.nlp.gen;
+package main.java.org.aigents.nlp.lg;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
-import main.java.org.aigents.nlp.gen.Parser;
-
-public class TestParser {
-
-	public static void main(String[] args) throws IOException {		
-		System.out.println("Testing Parser.java");
-        Parser parser = new Parser();                 //Create parser object
-        parser.loadDict();                            //Load default dictionary
-        if(parser.isDictLoaded())
-        	System.out.println("Dictionary loaded. "+parser.printDictInfo());
-        
-        String testSentence="Tuna is a fish";
-        System.out.println("Test sentence='"+testSentence+"'");
-        parser.parseSentence(testSentence);
-        
-        System.out.println("test finished");
+public class Sentence {
+	 
+	public ArrayList<Word> words = new ArrayList<Word>();
+	public boolean valid = false;
+			
+	public int length() {
+		return words.size(); 
+	}
+	
+	public String toString() {
+		String str="";
+		for(int wordIndex=0; wordIndex<this.length(); wordIndex++) {
+			Word w=this.words.get(wordIndex);
+			str+="["+w.getWord()+"."+w.getSubscript()+"]";	
+		}
+		return str;
 	}
 }

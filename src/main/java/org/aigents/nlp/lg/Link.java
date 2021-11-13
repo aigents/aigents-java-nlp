@@ -22,25 +22,36 @@
  * SOFTWARE.
  */
 
-package test.java.org.aigents.nlp.gen;
+package main.java.org.aigents.nlp.lg;
 
-import java.io.IOException;
 
-import main.java.org.aigents.nlp.gen.Parser;
-
-public class TestParser {
-
-	public static void main(String[] args) throws IOException {		
-		System.out.println("Testing Parser.java");
-        Parser parser = new Parser();                 //Create parser object
-        parser.loadDict();                            //Load default dictionary
-        if(parser.isDictLoaded())
-        	System.out.println("Dictionary loaded. "+parser.printDictInfo());
-        
-        String testSentence="Tuna is a fish";
-        System.out.println("Test sentence='"+testSentence+"'");
-        parser.parseSentence(testSentence);
-        
-        System.out.println("test finished");
+public class Link {
+	
+	public int w1Index = 0;
+	public int w2Index = 0;
+	
+	public Link(int wi1, int wi2) {
+		w1Index=wi1;
+		w2Index=wi2;
+	}
+			
+	@Override            
+	public boolean equals(Object me) {
+		Link link = (Link)me;
+		if((this.w1Index==link.w1Index) && (this.w2Index==link.w2Index))
+			return true;
+		else
+			return false;
+	}
+	
+	@Override            
+	public int hashCode() {
+		return (this.w1Index<<16) | (this.w2Index);
+	}
+	
+	@Override            
+	public String toString() {
+		return w1Index+"-"+w2Index;
 	}
 }
+

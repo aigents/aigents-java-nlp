@@ -22,25 +22,41 @@
  * SOFTWARE.
  */
 
-package test.java.org.aigents.nlp.gen;
+package main.java.org.aigents.nlp.lg;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
-import main.java.org.aigents.nlp.gen.Parser;
-
-public class TestParser {
-
-	public static void main(String[] args) throws IOException {		
-		System.out.println("Testing Parser.java");
-        Parser parser = new Parser();                 //Create parser object
-        parser.loadDict();                            //Load default dictionary
-        if(parser.isDictLoaded())
-        	System.out.println("Dictionary loaded. "+parser.printDictInfo());
-        
-        String testSentence="Tuna is a fish";
-        System.out.println("Test sentence='"+testSentence+"'");
-        parser.parseSentence(testSentence);
-        
-        System.out.println("test finished");
+public class Linkage {
+	
+	public ArrayList<Link> linkList=new ArrayList<Link>();
+		
+	public void addLink(Link link) {
+		linkList.add(link);
+	}
+	
+	public int length(){
+		return linkList.size();
+	}
+	
+	public String toString() {
+		String str="";
+		for(Link link: linkList) {
+			str+="["+link.w1Index+"-"+link.w2Index+"]" ;
+		}	
+		return str;
+	}
+	
+	public boolean isAllWordsCanBeConnected(int sentenceLen) {
+		boolean result=false;
+		HashSet<Integer> indexes = new HashSet<>();
+		for(Link link: linkList) {
+			indexes.add(link.w1Index);
+			indexes.add(link.w2Index);
+		}
+		if(indexes.size()==sentenceLen)
+			result=true;
+		
+		return result;
 	}
 }
